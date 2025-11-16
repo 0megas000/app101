@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bleeding Borderlands - Interactive Map</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="map-header">
+            <h1 class="map-title">⚔️ BLEEDING BORDERLANDS ⚔️</h1>
+            <p class="map-subtitle">An Interactive Regional Map for D&D Campaign</p>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="map-layout">
+            <!-- Left Panel: Controls -->
+            <aside class="controls-panel">
+                <h3>🎛️ Map Controls</h3>
+
+                <div class="control-group">
+                    <h4>Layers</h4>
+                    <button id="toggle-corruption" class="control-btn active">Corruption Zones</button>
+                    <button id="toggle-factions" class="control-btn">Faction Territories</button>
+                    <button id="toggle-routes" class="control-btn active">Trade Routes</button>
+                    <button id="toggle-distance" class="control-btn">Distance Rings</button>
+                </div>
+
+                <div class="control-group">
+                    <h4>Tools</h4>
+                    <button id="calculate-distance" class="control-btn">Distance Calculator</button>
+                </div>
+
+                <div class="control-group">
+                    <h4>Export</h4>
+                    <button id="export-png" class="export-btn">Export as PNG</button>
+                    <button id="export-svg" class="export-btn">Export as SVG</button>
+                </div>
+
+                <!-- Legend Section -->
+                <div class="control-group" style="margin-top: 30px;">
+                    <h4>Legend</h4>
+                    <div class="legend-section">
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: #2E5C8A;"></div>
+                            <span class="legend-label">🎓 University City</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: #D4AF37;"></div>
+                            <span class="legend-label">⚜️ Fortress City</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: #6B6B6B;"></div>
+                            <span class="legend-label">⛰️ Mountain City</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: #8B6F47;"></div>
+                            <span class="legend-label">🛤️ Trade Hub</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: #2C5F8D;"></div>
+                            <span class="legend-label">⚓ River Port</span>
+                        </div>
+                    </div>
+
+                    <div class="legend-section" style="margin-top: 15px;">
+                        <h4 style="margin-bottom: 8px;">Corruption Levels</h4>
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: rgba(139, 71, 137, 0);"></div>
+                            <span class="legend-label">Level 0: Safe</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: rgba(139, 71, 137, 0.15);"></div>
+                            <span class="legend-label">Level 1: Flutter</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: rgba(139, 71, 137, 0.35);"></div>
+                            <span class="legend-label">Level 2: Bleeding</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: rgba(139, 71, 137, 0.6);"></div>
+                            <span class="legend-label">Level 3: Storm</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-symbol" style="background: rgba(74, 14, 78, 0.85);"></div>
+                            <span class="legend-label">Level 4: Chaos</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center: Map -->
+            <main class="map-container">
+                <div id="map-svg-container"></div>
+            </main>
+
+            <!-- Right Panel: Details -->
+            <aside id="detail-panel" class="detail-panel hidden">
+                <div class="detail-header">
+                    <h2>Select a location</h2>
+                    <button id="close-detail" class="close-btn">&times;</button>
+                </div>
+                <div class="detail-content">
+                    <p style="text-align: center; color: #9B8B7B; padding: 40px 20px;">
+                        Click on any location on the map to view detailed information.
+                    </p>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Additional Information -->
+        <footer style="text-align: center; padding: 40px 20px; margin-top: 40px; border-top: 2px solid rgba(61, 40, 23, 0.5);">
+            <p style="color: #9B8B7B; font-size: 14px; font-style: italic;">
+                "The Maelstrom grows. Reality tears. Six factions race against time. Only one can prevent the end."
+            </p>
+            <p style="color: #6B5D52; font-size: 12px; margin-top: 15px;">
+                Interactive SVG Map for D&D Campaign | Scale: 1 pixel ≈ 0.1 miles
+            </p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="map-data.js"></script>
+    <script src="map-renderer.js"></script>
+    <script src="interactions.js"></script>
+    <script>
+        // Initialize the map when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing Bleeding Borderlands Map...');
+
+            // Create renderer instance
+            const renderer = new MapRenderer(
+                MAP_CONFIG,
+                LOCATIONS,
+                GEOGRAPHIC_FEATURES,
+                TRADE_ROUTES,
+                FACTIONS,
+                CORRUPTION_ZONES
+            );
+
+            // Initialize map
+            renderer.initialize('map-svg-container');
+
+            // Create interaction handler
+            const interactionHandler = new InteractionHandler(
+                renderer,
+                LOCATIONS,
+                FACTIONS,
+                CORRUPTION_ZONES
+            );
+
+            // Initialize interactions
+            interactionHandler.initialize();
+
+            console.log('Map initialized successfully!');
+
+            // Make renderer globally accessible for debugging
+            window.mapRenderer = renderer;
+            window.interactionHandler = interactionHandler;
+        });
+
+        // Handle window resize
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                console.log('Window resized - map remains responsive');
+            }, 250);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Press 'C' to toggle corruption zones
+            if (e.key === 'c' || e.key === 'C') {
+                const btn = document.getElementById('toggle-corruption');
+                if (btn) btn.click();
+            }
+            // Press 'F' to toggle faction territories
+            else if (e.key === 'f' || e.key === 'F') {
+                const btn = document.getElementById('toggle-factions');
+                if (btn) btn.click();
+            }
+            // Press 'R' to toggle routes
+            else if (e.key === 'r' || e.key === 'R') {
+                const btn = document.getElementById('toggle-routes');
+                if (btn) btn.click();
+            }
+            // Press 'D' to toggle distance rings
+            else if (e.key === 'd' || e.key === 'D') {
+                const btn = document.getElementById('toggle-distance');
+                if (btn) btn.click();
+            }
+            // Press 'ESC' to close detail panel
+            else if (e.key === 'Escape') {
+                if (window.interactionHandler) {
+                    window.interactionHandler.hideDetailPanel();
+                }
+            }
+        });
+
+        // Add helpful console messages
+        console.log('%c🗺️ Bleeding Borderlands Interactive Map', 'font-size: 20px; font-weight: bold; color: #D4AF37;');
+        console.log('%cKeyboard Shortcuts:', 'font-size: 14px; font-weight: bold; color: #8B6F47;');
+        console.log('C - Toggle Corruption Zones');
+        console.log('F - Toggle Faction Territories');
+        console.log('R - Toggle Trade Routes');
+        console.log('D - Toggle Distance Rings');
+        console.log('ESC - Close Detail Panel');
+        console.log('%cDebug Access:', 'font-size: 14px; font-weight: bold; color: #8B6F47; margin-top: 10px;');
+        console.log('window.mapRenderer - Access to map renderer');
+        console.log('window.interactionHandler - Access to interaction handler');
+    </script>
+</body>
+</html>
