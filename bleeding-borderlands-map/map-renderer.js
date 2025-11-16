@@ -69,6 +69,9 @@ class MapRenderer {
 
     // Render all layers
     this.render();
+
+    // Return SVG element for pan-zoom controller
+    return this.svg;
   }
 
   // Create SVG defs (gradients, patterns, filters)

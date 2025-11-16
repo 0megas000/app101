@@ -558,8 +558,9 @@ class UIControls {
   }
 
   closeAllModals() {
-    const modals = document.querySelectorAll('.modal:not(.hidden)');
+    const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
+      modal.style.display = 'none';
       modal.classList.add('hidden');
     });
   }
@@ -607,7 +608,7 @@ class UIControls {
         <div class="modal-content">
           <div class="modal-header">
             <h2 class="modal-title">${title}</h2>
-            <button class="close-btn" onclick="this.closest('.modal').classList.add('hidden')">&times;</button>
+            <button class="close-btn" onclick="const m=this.closest('.modal'); m.style.display='none'; m.classList.add('hidden');">&times;</button>
           </div>
           <div class="modal-body">${content}</div>
         </div>
@@ -618,11 +619,13 @@ class UIControls {
       modal.querySelector('.modal-body').innerHTML = content;
     }
 
+    modal.style.display = 'flex';
     modal.classList.remove('hidden');
 
     // Close on outside click
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
+        modal.style.display = 'none';
         modal.classList.add('hidden');
       }
     });

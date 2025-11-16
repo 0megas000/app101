@@ -116,6 +116,7 @@ class LocationEditor {
     if (title) title.textContent = 'Add New Location';
 
     // Show modal
+    this.editorModal.style.display = 'flex';
     this.editorModal.classList.remove('hidden');
 
     // Focus name field
@@ -158,6 +159,7 @@ class LocationEditor {
     if (title) title.textContent = `Edit: ${location.name}`;
 
     // Show modal
+    this.editorModal.style.display = 'flex';
     this.editorModal.classList.remove('hidden');
   }
 
@@ -377,6 +379,7 @@ class LocationEditor {
   // Hide editor modal
   hideEditorModal() {
     if (this.editorModal) {
+      this.editorModal.style.display = 'none';
       this.editorModal.classList.add('hidden');
     }
     this.currentLocation = null;
