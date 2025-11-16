@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bleeding Borderlands - Interactive Map</title>
+    <title>Bleeding Borderlands - Interactive Map Editor</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,213 +11,942 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles-v2.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="map-header">
-            <h1 class="map-title">⚔️ BLEEDING BORDERLANDS ⚔️</h1>
-            <p class="map-subtitle">An Interactive Regional Map for D&D Campaign</p>
+    <!-- Main App Container -->
+    <div class="app-container">
+
+        <!-- ==================== HEADER ==================== -->
+        <header class="app-header">
+            <div class="header-left">
+                <button id="toggle-left-sidebar" class="sidebar-toggle-btn" title="Toggle Locations List (L)">
+                    <span class="toggle-icon">☰</span>
+                </button>
+                <h1 class="app-title">⚔️ BLEEDING BORDERLANDS ⚔️</h1>
+            </div>
+
+            <div class="header-center">
+                <div class="save-status">
+                    <span id="save-status-indicator" class="status-indicator"></span>
+                    <span id="save-status-text">Initializing...</span>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button id="btn-help" class="header-btn" title="Help & Shortcuts (H)">
+                    <span>❓</span>
+                </button>
+                <button id="btn-export" class="header-btn" title="Export Data">
+                    <span>💾</span>
+                </button>
+                <button id="btn-import" class="header-btn" title="Import Data">
+                    <span>📥</span>
+                </button>
+                <button id="toggle-right-sidebar" class="sidebar-toggle-btn" title="Toggle Legend (G)">
+                    <span class="toggle-icon">☰</span>
+                </button>
+            </div>
         </header>
 
-        <!-- Main Layout -->
-        <div class="map-layout">
-            <!-- Left Panel: Controls -->
-            <aside class="controls-panel">
-                <h3>🎛️ Map Controls</h3>
+        <!-- ==================== LEFT SIDEBAR: LOCATIONS LIST ==================== -->
+        <aside id="left-sidebar" class="sidebar sidebar-left">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">📍 Locations</h2>
+                <button id="btn-add-location" class="btn btn-primary">
+                    <span>➕</span> Add Location
+                </button>
+            </div>
 
-                <div class="control-group">
-                    <h4>Layers</h4>
-                    <button id="toggle-corruption" class="control-btn active">Corruption Zones</button>
-                    <button id="toggle-factions" class="control-btn">Faction Territories</button>
-                    <button id="toggle-routes" class="control-btn active">Trade Routes</button>
-                    <button id="toggle-distance" class="control-btn">Distance Rings</button>
+            <div class="sidebar-content">
+                <!-- Search & Filter -->
+                <div class="search-container">
+                    <input
+                        type="text"
+                        id="location-search"
+                        class="search-input"
+                        placeholder="🔍 Search locations..."
+                        autocomplete="off"
+                    >
                 </div>
 
-                <div class="control-group">
-                    <h4>Tools</h4>
-                    <button id="calculate-distance" class="control-btn">Distance Calculator</button>
+                <div class="filter-container">
+                    <label class="filter-label">Filter by Type:</label>
+                    <select id="location-filter" class="filter-select">
+                        <option value="all">All Types</option>
+                        <option value="city">Cities</option>
+                        <option value="town">Towns</option>
+                        <option value="village">Villages</option>
+                        <option value="fortress">Fortresses</option>
+                        <option value="ruins">Ruins</option>
+                        <option value="landmark">Landmarks</option>
+                        <option value="dungeon">Dungeons</option>
+                        <option value="camp">Camps</option>
+                    </select>
                 </div>
 
-                <div class="control-group">
-                    <h4>Export</h4>
-                    <button id="export-png" class="export-btn">Export as PNG</button>
-                    <button id="export-svg" class="export-btn">Export as SVG</button>
-                </div>
-
-                <!-- Legend Section -->
-                <div class="control-group" style="margin-top: 30px;">
-                    <h4>Legend</h4>
-                    <div class="legend-section">
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: #2E5C8A;"></div>
-                            <span class="legend-label">🎓 University City</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: #D4AF37;"></div>
-                            <span class="legend-label">⚜️ Fortress City</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: #6B6B6B;"></div>
-                            <span class="legend-label">⛰️ Mountain City</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: #8B6F47;"></div>
-                            <span class="legend-label">🛤️ Trade Hub</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: #2C5F8D;"></div>
-                            <span class="legend-label">⚓ River Port</span>
-                        </div>
-                    </div>
-
-                    <div class="legend-section" style="margin-top: 15px;">
-                        <h4 style="margin-bottom: 8px;">Corruption Levels</h4>
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: rgba(139, 71, 137, 0);"></div>
-                            <span class="legend-label">Level 0: Safe</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: rgba(139, 71, 137, 0.15);"></div>
-                            <span class="legend-label">Level 1: Flutter</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: rgba(139, 71, 137, 0.35);"></div>
-                            <span class="legend-label">Level 2: Bleeding</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: rgba(139, 71, 137, 0.6);"></div>
-                            <span class="legend-label">Level 3: Storm</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-symbol" style="background: rgba(74, 14, 78, 0.85);"></div>
-                            <span class="legend-label">Level 4: Chaos</span>
-                        </div>
+                <!-- Location List -->
+                <div id="location-list" class="location-list">
+                    <!-- Dynamically populated by JavaScript -->
+                    <div class="location-list-placeholder">
+                        <p>Loading locations...</p>
                     </div>
                 </div>
-            </aside>
+            </div>
 
-            <!-- Center: Map -->
-            <main class="map-container">
-                <div id="map-svg-container"></div>
-            </main>
-
-            <!-- Right Panel: Details -->
-            <aside id="detail-panel" class="detail-panel hidden">
-                <div class="detail-header">
-                    <h2>Select a location</h2>
-                    <button id="close-detail" class="close-btn">&times;</button>
+            <div class="sidebar-footer">
+                <div class="location-count">
+                    <span id="location-count-text">0 locations</span>
                 </div>
-                <div class="detail-content">
-                    <p style="text-align: center; color: #9B8B7B; padding: 40px 20px;">
-                        Click on any location on the map to view detailed information.
-                    </p>
-                </div>
-            </aside>
-        </div>
+            </div>
+        </aside>
 
-        <!-- Additional Information -->
-        <footer style="text-align: center; padding: 40px 20px; margin-top: 40px; border-top: 2px solid rgba(61, 40, 23, 0.5);">
-            <p style="color: #9B8B7B; font-size: 14px; font-style: italic;">
-                "The Maelstrom grows. Reality tears. Six factions race against time. Only one can prevent the end."
-            </p>
-            <p style="color: #6B5D52; font-size: 12px; margin-top: 15px;">
-                Interactive SVG Map for D&D Campaign | Scale: 1 pixel ≈ 0.1 miles
-            </p>
+        <!-- ==================== MAP CONTAINER ==================== -->
+        <main class="map-main">
+            <!-- Zoom Controls -->
+            <div class="zoom-controls">
+                <button id="btn-zoom-in" class="zoom-btn" title="Zoom In (+)">
+                    <span>➕</span>
+                </button>
+                <div id="zoom-level" class="zoom-level">100%</div>
+                <button id="btn-zoom-out" class="zoom-btn" title="Zoom Out (-)">
+                    <span>➖</span>
+                </button>
+                <button id="btn-zoom-reset" class="zoom-btn" title="Reset View (0)">
+                    <span>🎯</span>
+                </button>
+            </div>
+
+            <!-- Map SVG Container -->
+            <div id="map-svg-container" class="map-svg-container">
+                <!-- SVG will be injected here by MapRenderer -->
+            </div>
+
+            <!-- Map Overlay Info -->
+            <div class="map-overlay-info">
+                <div id="coordinates-display" class="coordinates-display">
+                    <span>X: <span id="coord-x">0</span> mi</span>
+                    <span>Y: <span id="coord-y">0</span> mi</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- ==================== RIGHT SIDEBAR: LEGEND & CONTROLS ==================== -->
+        <aside id="right-sidebar" class="sidebar sidebar-right">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">🗺️ Legend & Layers</h2>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Layer Toggles -->
+                <div class="control-section">
+                    <h3 class="control-section-title">Map Layers</h3>
+
+                    <label class="toggle-control">
+                        <input type="checkbox" id="toggle-corruption" checked>
+                        <span class="toggle-label">⚡ Corruption Zones</span>
+                        <span class="toggle-shortcut">C</span>
+                    </label>
+
+                    <label class="toggle-control">
+                        <input type="checkbox" id="toggle-factions" checked>
+                        <span class="toggle-label">🛡️ Faction Territories</span>
+                        <span class="toggle-shortcut">F</span>
+                    </label>
+
+                    <label class="toggle-control">
+                        <input type="checkbox" id="toggle-routes" checked>
+                        <span class="toggle-label">🛤️ Trade Routes</span>
+                        <span class="toggle-shortcut">R</span>
+                    </label>
+
+                    <label class="toggle-control">
+                        <input type="checkbox" id="toggle-distance-rings">
+                        <span class="toggle-label">📏 Distance Rings</span>
+                        <span class="toggle-shortcut">D</span>
+                    </label>
+
+                    <label class="toggle-control">
+                        <input type="checkbox" id="toggle-secrets">
+                        <span class="toggle-label">🔒 Secret Locations</span>
+                        <span class="toggle-shortcut">S</span>
+                    </label>
+
+                    <label class="toggle-control">
+                        <input type="checkbox" id="toggle-labels" checked>
+                        <span class="toggle-label">🏷️ Location Labels</span>
+                        <span class="toggle-shortcut">B</span>
+                    </label>
+                </div>
+
+                <!-- Edit Mode -->
+                <div class="control-section">
+                    <h3 class="control-section-title">Editor</h3>
+
+                    <label class="toggle-control toggle-edit-mode">
+                        <input type="checkbox" id="toggle-edit-mode">
+                        <span class="toggle-label">✏️ Edit Mode</span>
+                        <span class="toggle-shortcut">E</span>
+                    </label>
+
+                    <div class="edit-mode-help">
+                        <small>Enable to drag locations and access editor</small>
+                    </div>
+                </div>
+
+                <!-- Location Types Legend -->
+                <div class="legend-section">
+                    <h3 class="legend-title">Location Types</h3>
+
+                    <div class="legend-item">
+                        <div class="legend-symbol city"></div>
+                        <span class="legend-text">🏰 City</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="legend-symbol town"></div>
+                        <span class="legend-text">🏘️ Town</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="legend-symbol village"></div>
+                        <span class="legend-text">🏡 Village</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="legend-symbol fortress"></div>
+                        <span class="legend-text">⚔️ Fortress</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="legend-symbol ruins"></div>
+                        <span class="legend-text">🏛️ Ruins</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="legend-symbol landmark"></div>
+                        <span class="legend-text">⛰️ Landmark</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="legend-symbol dungeon"></div>
+                        <span class="legend-text">⚠️ Dungeon</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="legend-symbol camp"></div>
+                        <span class="legend-text">⛺ Camp</span>
+                    </div>
+                </div>
+
+                <!-- Corruption Levels -->
+                <div class="legend-section">
+                    <h3 class="legend-title">Corruption Levels</h3>
+
+                    <div class="legend-item">
+                        <div class="corruption-swatch level-0"></div>
+                        <span class="legend-text">Level 0: Safe</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="corruption-swatch level-1"></div>
+                        <span class="legend-text">Level 1: Flutter</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="corruption-swatch level-2"></div>
+                        <span class="legend-text">Level 2: Bleeding</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="corruption-swatch level-3"></div>
+                        <span class="legend-text">Level 3: Storm</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="corruption-swatch level-4"></div>
+                        <span class="legend-text">Level 4: Chaos</span>
+                    </div>
+                </div>
+
+                <!-- Faction Colors -->
+                <div class="legend-section">
+                    <h3 class="legend-title">Factions</h3>
+
+                    <div class="legend-item">
+                        <div class="faction-swatch" style="background: #2E5C8A;"></div>
+                        <span class="legend-text">Arcane Covenant</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="faction-swatch" style="background: #D4AF37;"></div>
+                        <span class="legend-text">Golden Legion</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="faction-swatch" style="background: #6B6B6B;"></div>
+                        <span class="legend-text">Iron Brotherhood</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="faction-swatch" style="background: #228B22;"></div>
+                        <span class="legend-text">Verdant Circle</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="faction-swatch" style="background: #8B0000;"></div>
+                        <span class="legend-text">Crimson Pact</span>
+                    </div>
+
+                    <div class="legend-item">
+                        <div class="faction-swatch" style="background: #4B0082;"></div>
+                        <span class="legend-text">Shadow Syndicate</span>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="control-section">
+                    <h3 class="control-section-title">Data Management</h3>
+
+                    <button id="btn-manual-save" class="btn btn-secondary btn-full">
+                        💾 Save Now
+                    </button>
+
+                    <button id="btn-undo" class="btn btn-secondary" disabled>
+                        ↶ Undo
+                    </button>
+
+                    <button id="btn-redo" class="btn btn-secondary" disabled>
+                        ↷ Redo
+                    </button>
+
+                    <div class="data-actions">
+                        <button id="btn-export-json" class="btn btn-outline btn-full">
+                            📤 Export JSON
+                        </button>
+
+                        <button id="btn-import-json" class="btn btn-outline btn-full">
+                            📥 Import JSON
+                        </button>
+
+                        <button id="btn-reset-data" class="btn btn-danger btn-full">
+                            🔄 Reset to Defaults
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Storage Info -->
+                <div class="storage-info">
+                    <div class="storage-bar">
+                        <div id="storage-bar-fill" class="storage-bar-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="storage-text">
+                        <small>Storage: <span id="storage-used">0</span> KB / 5 MB</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ==================== FOOTER ==================== -->
+        <footer class="app-footer">
+            <div class="footer-left">
+                <span class="footer-text">
+                    "The Maelstrom grows. Reality tears. Six factions race against time."
+                </span>
+            </div>
+
+            <div class="footer-center">
+                <span class="footer-text">
+                    Scale: 10 pixels = 1 mile | Canvas: 2400×2400px (240×240 miles)
+                </span>
+            </div>
+
+            <div class="footer-right">
+                <span class="footer-text">
+                    Auto-save: <span id="auto-save-status">Active</span> |
+                    Last saved: <span id="last-save-time">Never</span>
+                </span>
+            </div>
         </footer>
     </div>
 
-    <!-- Scripts -->
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Location Editor Modal -->
+    <div id="location-editor-modal" class="modal" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2 id="editor-modal-title">Add New Location</h2>
+                <button id="editor-close-btn" class="modal-close-btn">&times;</button>
+            </div>
+
+            <form id="location-editor-form" class="modal-body">
+                <!-- Basic Info -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Basic Information</h3>
+
+                    <div class="form-row">
+                        <label class="form-label required">
+                            Name
+                            <input
+                                type="text"
+                                id="edit-name"
+                                name="name"
+                                class="form-input"
+                                required
+                                placeholder="Enter location name"
+                            >
+                        </label>
+                    </div>
+
+                    <div class="form-row form-row-2">
+                        <label class="form-label required">
+                            Type
+                            <select id="edit-type" name="type" class="form-select" required>
+                                <option value="city">City</option>
+                                <option value="town">Town</option>
+                                <option value="village">Village</option>
+                                <option value="fortress">Fortress</option>
+                                <option value="ruins">Ruins</option>
+                                <option value="landmark">Landmark</option>
+                                <option value="dungeon">Dungeon</option>
+                                <option value="camp">Camp</option>
+                            </select>
+                        </label>
+
+                        <label class="form-label">
+                            Population
+                            <input
+                                type="number"
+                                id="edit-population"
+                                name="population"
+                                class="form-input"
+                                min="0"
+                                placeholder="0"
+                            >
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Position -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Position</h3>
+
+                    <div class="form-row form-row-2">
+                        <label class="form-label required">
+                            X (miles from Maelstrom)
+                            <input
+                                type="number"
+                                id="edit-x"
+                                name="x"
+                                class="form-input"
+                                required
+                                step="0.1"
+                                min="-120"
+                                max="120"
+                            >
+                        </label>
+
+                        <label class="form-label required">
+                            Y (miles from Maelstrom)
+                            <input
+                                type="number"
+                                id="edit-y"
+                                name="y"
+                                class="form-input"
+                                required
+                                step="0.1"
+                                min="-120"
+                                max="120"
+                            >
+                        </label>
+                    </div>
+
+                    <div class="form-help">
+                        <small>Maelstrom is at (0, 0). Drag location on map or enter coordinates manually.</small>
+                    </div>
+                </div>
+
+                <!-- Details -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Details</h3>
+
+                    <div class="form-row">
+                        <label class="form-label">
+                            Description
+                            <textarea
+                                id="edit-description"
+                                name="description"
+                                class="form-textarea"
+                                rows="4"
+                                placeholder="Describe this location..."
+                            ></textarea>
+                        </label>
+                    </div>
+
+                    <div class="form-row form-row-2">
+                        <label class="form-label">
+                            Faction
+                            <select id="edit-faction" name="faction" class="form-select">
+                                <option value="">None</option>
+                                <option value="arcane-covenant">Arcane Covenant</option>
+                                <option value="golden-legion">Golden Legion</option>
+                                <option value="iron-brotherhood">Iron Brotherhood</option>
+                                <option value="verdant-circle">Verdant Circle</option>
+                                <option value="crimson-pact">Crimson Pact</option>
+                                <option value="shadow-syndicate">Shadow Syndicate</option>
+                            </select>
+                        </label>
+
+                        <label class="form-label">
+                            Corruption Level
+                            <select id="edit-corruption" name="corruption" class="form-select">
+                                <option value="0">0 - Safe</option>
+                                <option value="1">1 - Flutter</option>
+                                <option value="2">2 - Bleeding</option>
+                                <option value="3">3 - Storm</option>
+                                <option value="4">4 - Chaos</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Properties -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Properties</h3>
+
+                    <div class="form-row form-checkboxes">
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="edit-secret" name="secret">
+                            <span>🔒 Secret Location (hidden by default)</span>
+                        </label>
+
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="edit-important" name="important">
+                            <span>⭐ Important Location</span>
+                        </label>
+
+                        <label class="form-checkbox">
+                            <input type="checkbox" id="edit-discovered" name="discovered" checked>
+                            <span>👁️ Discovered by Party</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-section">
+                    <h3 class="form-section-title">GM Notes</h3>
+
+                    <div class="form-row">
+                        <label class="form-label">
+                            Private Notes
+                            <textarea
+                                id="edit-notes"
+                                name="notes"
+                                class="form-textarea"
+                                rows="3"
+                                placeholder="Private notes (not shown to players)..."
+                            ></textarea>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Validation Errors -->
+                <div id="form-errors" class="form-errors" style="display: none;"></div>
+
+                <!-- Form Actions -->
+                <div class="modal-footer">
+                    <button type="button" id="editor-cancel-btn" class="btn btn-outline">
+                        Cancel
+                    </button>
+                    <button type="button" id="editor-delete-btn" class="btn btn-danger" style="display: none;">
+                        Delete Location
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span id="editor-submit-text">Add Location</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal" style="display: none;">
+        <div class="modal-dialog modal-dialog-large">
+            <div class="modal-header">
+                <h2>❓ Help & Keyboard Shortcuts</h2>
+                <button id="help-close-btn" class="modal-close-btn">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="help-section">
+                    <h3>🎮 Map Navigation</h3>
+                    <ul class="help-list">
+                        <li><strong>Mouse Wheel:</strong> Zoom in/out (cursor-centered)</li>
+                        <li><strong>Click + Drag:</strong> Pan around the map</li>
+                        <li><strong>Touch:</strong> Pinch to zoom, drag to pan</li>
+                        <li><strong>Click Location:</strong> Select and view details</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>⌨️ Keyboard Shortcuts</h3>
+                    <div class="shortcuts-grid">
+                        <div class="shortcut-item">
+                            <kbd>C</kbd>
+                            <span>Toggle Corruption Zones</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>F</kbd>
+                            <span>Toggle Faction Territories</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>R</kbd>
+                            <span>Toggle Trade Routes</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>D</kbd>
+                            <span>Toggle Distance Rings</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>S</kbd>
+                            <span>Toggle Secret Locations</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>B</kbd>
+                            <span>Toggle Labels</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>E</kbd>
+                            <span>Toggle Edit Mode</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>L</kbd>
+                            <span>Toggle Locations Sidebar</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>G</kbd>
+                            <span>Toggle Legend Sidebar</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>H</kbd>
+                            <span>Show Help</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>+</kbd> / <kbd>=</kbd>
+                            <span>Zoom In</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>-</kbd>
+                            <span>Zoom Out</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>0</kbd>
+                            <span>Reset View</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd>+<kbd>S</kbd>
+                            <span>Manual Save</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd>+<kbd>Z</kbd>
+                            <span>Undo</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd>+<kbd>Y</kbd>
+                            <span>Redo</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Esc</kbd>
+                            <span>Close Modal/Deselect</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>N</kbd>
+                            <span>New Location</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>✏️ Edit Mode</h3>
+                    <ul class="help-list">
+                        <li>Enable Edit Mode to drag locations and reposition them</li>
+                        <li>Click a location to edit its properties</li>
+                        <li>Use "Add Location" button to create new locations</li>
+                        <li>All changes are auto-saved every 30 seconds</li>
+                        <li>Undo/Redo available for last 10 actions</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>💾 Data Management</h3>
+                    <ul class="help-list">
+                        <li><strong>Auto-save:</strong> Changes saved automatically every 30 seconds</li>
+                        <li><strong>LocalStorage:</strong> Data persists in browser (up to 5 MB)</li>
+                        <li><strong>Backups:</strong> Last 3 saves backed up automatically</li>
+                        <li><strong>Export:</strong> Download map data as JSON file</li>
+                        <li><strong>Import:</strong> Load map data from JSON file</li>
+                        <li><strong>Reset:</strong> Restore to default campaign data</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🗺️ Map Features</h3>
+                    <ul class="help-list">
+                        <li><strong>Ocean:</strong> Cerulean Sea to the west with depth gradients</li>
+                        <li><strong>Coastline:</strong> 95-mile Sapphire Coast with bays and cliffs</li>
+                        <li><strong>Delta:</strong> Silverflow Delta where river meets ocean</li>
+                        <li><strong>Rivers:</strong> Silverflow River flowing east to west</li>
+                        <li><strong>Terrain:</strong> Elevation-based coloring (0-9,200 ft)</li>
+                        <li><strong>Corruption:</strong> Maelstrom influence zones with 5 levels</li>
+                        <li><strong>Factions:</strong> 6 faction territories with color coding</li>
+                        <li><strong>Routes:</strong> Trade routes connecting major settlements</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>📐 Scale & Coordinates</h3>
+                    <ul class="help-list">
+                        <li><strong>Scale:</strong> 10 pixels = 1 mile</li>
+                        <li><strong>Canvas:</strong> 2400×2400 pixels (240×240 miles)</li>
+                        <li><strong>Center:</strong> The Maelstrom at (0, 0)</li>
+                        <li><strong>Coordinates:</strong> Real-world miles from Maelstrom center</li>
+                        <li><strong>Bounds:</strong> -120 to +120 miles in all directions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="help-close-btn-2" class="btn btn-primary">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="import-modal" class="modal" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h2>📥 Import Map Data</h2>
+                <button id="import-close-btn" class="modal-close-btn">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="import-section">
+                    <p>Select a JSON file to import map data. This will replace all current data.</p>
+                    <p class="warning-text">⚠️ Current data will be backed up before import.</p>
+
+                    <div class="file-upload">
+                        <input
+                            type="file"
+                            id="import-file-input"
+                            accept=".json,application/json"
+                            style="display: none;"
+                        >
+                        <button id="import-select-file-btn" class="btn btn-outline btn-full">
+                            📁 Select JSON File
+                        </button>
+                    </div>
+
+                    <div id="import-file-info" class="file-info" style="display: none;">
+                        <p>Selected: <strong id="import-filename"></strong></p>
+                        <p>Size: <span id="import-filesize"></span></p>
+                    </div>
+
+                    <div id="import-error" class="form-errors" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="import-cancel-btn" class="btn btn-outline">Cancel</button>
+                <button id="import-confirm-btn" class="btn btn-primary" disabled>
+                    Import Data
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification-toast" class="notification-toast" style="display: none;">
+        <div class="notification-content">
+            <span id="notification-icon" class="notification-icon"></span>
+            <span id="notification-message" class="notification-message"></span>
+        </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="hidden-file-input" accept=".json" style="display: none;">
+
+    <!-- ==================== SCRIPTS ==================== -->
+
+    <!-- Core Data -->
     <script src="map-data.js"></script>
+
+    <!-- Core Systems -->
+    <script src="pan-zoom.js"></script>
+    <script src="data-manager.js"></script>
     <script src="map-renderer.js"></script>
-    <script src="interactions.js"></script>
+    <script src="location-editor.js"></script>
+    <script src="ui-controls.js"></script>
+
+    <!-- Application Initialization -->
     <script>
-        // Initialize the map when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Initializing Bleeding Borderlands Map...');
+        // ==================== APPLICATION INITIALIZATION ====================
 
-            // Create renderer instance
-            const renderer = new MapRenderer(
-                MAP_CONFIG,
-                LOCATIONS,
-                GEOGRAPHIC_FEATURES,
-                TRADE_ROUTES,
-                FACTIONS,
-                CORRUPTION_ZONES
-            );
+        console.log('%c🗺️ BLEEDING BORDERLANDS INTERACTIVE MAP', 'font-size: 20px; font-weight: bold; color: #D4AF37; text-shadow: 2px 2px 4px #000;');
+        console.log('%cInitializing systems...', 'color: #8B6F47; font-weight: bold;');
 
-            // Initialize map
-            renderer.initialize('map-svg-container');
+        // Global application state
+        const BleedingBorderlandsApp = {
+            config: null,
+            dataManager: null,
+            mapRenderer: null,
+            panZoom: null,
+            locationEditor: null,
+            uiControls: null,
+            svgElement: null,
 
-            // Create interaction handler
-            const interactionHandler = new InteractionHandler(
-                renderer,
-                LOCATIONS,
-                FACTIONS,
-                CORRUPTION_ZONES
-            );
+            // Initialize the entire application
+            initialize() {
+                console.log('📦 Loading configuration...');
+                this.config = MAP_CONFIG;
 
-            // Initialize interactions
-            interactionHandler.initialize();
+                console.log('💾 Initializing data manager...');
+                this.dataManager = new DataManager({
+                    version: "1.0",
+                    lastModified: new Date().toISOString(),
+                    locations: LOCATIONS,
+                    features: GEOGRAPHIC_FEATURES,
+                    routes: TRADE_ROUTES,
+                    factions: FACTIONS,
+                    corruption: CORRUPTION_ZONES,
+                    ocean: OCEAN,
+                    coastline: COASTLINE
+                });
 
-            console.log('Map initialized successfully!');
+                console.log('🎨 Initializing map renderer...');
+                this.mapRenderer = new MapRenderer(
+                    this.config,
+                    this.dataManager.data.locations,
+                    this.dataManager.data.features,
+                    this.dataManager.data.routes,
+                    this.dataManager.data.factions,
+                    this.dataManager.data.corruption,
+                    this.dataManager.data.ocean,
+                    this.dataManager.data.coastline
+                );
 
-            // Make renderer globally accessible for debugging
-            window.mapRenderer = renderer;
-            window.interactionHandler = interactionHandler;
+                const container = document.getElementById('map-svg-container');
+                this.svgElement = this.mapRenderer.initialize(container);
+
+                console.log('🖱️ Initializing pan-zoom controller...');
+                this.panZoom = new PanZoomController(this.svgElement, this.config);
+
+                console.log('✏️ Initializing location editor...');
+                this.locationEditor = new LocationEditor(
+                    this.dataManager,
+                    this.mapRenderer,
+                    this.panZoom
+                );
+                this.locationEditor.initialize();
+
+                console.log('🎛️ Initializing UI controls...');
+                this.uiControls = new UIControls(
+                    this.dataManager,
+                    this.mapRenderer,
+                    this.panZoom,
+                    this.locationEditor
+                );
+                this.uiControls.initialize();
+
+                // Setup event listeners
+                this.setupEventListeners();
+
+                // Initial render
+                console.log('🖼️ Rendering map...');
+                this.mapRenderer.render();
+
+                console.log('%c✓ Application initialized successfully!', 'color: #228B22; font-weight: bold; font-size: 14px;');
+                this.printDebugInfo();
+            },
+
+            // Setup global event listeners
+            setupEventListeners() {
+                // Listen for data changes to update UI
+                document.addEventListener('locationchange', (e) => {
+                    this.uiControls.updateLocationList();
+                });
+
+                document.addEventListener('datasave', (e) => {
+                    if (e.detail.success) {
+                        this.uiControls.showNotification('💾 Map data saved', 'success');
+                    } else {
+                        this.uiControls.showNotification('❌ Save failed: ' + e.detail.error, 'error');
+                    }
+                });
+
+                document.addEventListener('dataimport', (e) => {
+                    if (e.detail.success) {
+                        this.mapRenderer.render();
+                        this.uiControls.updateLocationList();
+                        this.uiControls.showNotification('✓ Data imported successfully', 'success');
+                    }
+                });
+
+                document.addEventListener('datareset', () => {
+                    this.mapRenderer.render();
+                    this.uiControls.updateLocationList();
+                    this.uiControls.showNotification('🔄 Data reset to defaults', 'info');
+                });
+
+                // Window unload warning if unsaved changes
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.dataManager.isDirty) {
+                        e.preventDefault();
+                        e.returnValue = '';
+                    }
+                });
+            },
+
+            // Print debug information
+            printDebugInfo() {
+                console.log('%c📊 Debug Information', 'color: #8B6F47; font-weight: bold; font-size: 14px;');
+                console.log('Location count:', Object.keys(this.dataManager.data.locations).length);
+                console.log('Canvas size:', `${this.config.canvasWidth}×${this.config.canvasHeight}px`);
+                console.log('Map area:', `${this.config.totalAreaMiles}×${this.config.totalAreaMiles} miles`);
+                console.log('Scale:', `${this.config.pixelsPerMile} pixels per mile`);
+                console.log('\n%c🎮 Global Access', 'color: #8B6F47; font-weight: bold;');
+                console.log('App:', 'window.BleedingBorderlandsApp');
+                console.log('Data Manager:', 'window.BleedingBorderlandsApp.dataManager');
+                console.log('Map Renderer:', 'window.BleedingBorderlandsApp.mapRenderer');
+                console.log('Pan-Zoom:', 'window.BleedingBorderlandsApp.panZoom');
+                console.log('Location Editor:', 'window.BleedingBorderlandsApp.locationEditor');
+                console.log('UI Controls:', 'window.BleedingBorderlandsApp.uiControls');
+                console.log('\n%c⌨️ Press H for keyboard shortcuts', 'color: #D4AF37; font-weight: bold;');
+            }
+        };
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            BleedingBorderlandsApp.initialize();
+
+            // Make globally accessible for debugging
+            window.BleedingBorderlandsApp = BleedingBorderlandsApp;
         });
 
-        // Handle window resize
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function() {
-                console.log('Window resized - map remains responsive');
-            }, 250);
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Press 'C' to toggle corruption zones
-            if (e.key === 'c' || e.key === 'C') {
-                const btn = document.getElementById('toggle-corruption');
-                if (btn) btn.click();
-            }
-            // Press 'F' to toggle faction territories
-            else if (e.key === 'f' || e.key === 'F') {
-                const btn = document.getElementById('toggle-factions');
-                if (btn) btn.click();
-            }
-            // Press 'R' to toggle routes
-            else if (e.key === 'r' || e.key === 'R') {
-                const btn = document.getElementById('toggle-routes');
-                if (btn) btn.click();
-            }
-            // Press 'D' to toggle distance rings
-            else if (e.key === 'd' || e.key === 'D') {
-                const btn = document.getElementById('toggle-distance');
-                if (btn) btn.click();
-            }
-            // Press 'ESC' to close detail panel
-            else if (e.key === 'Escape') {
-                if (window.interactionHandler) {
-                    window.interactionHandler.hideDetailPanel();
+        // Handle page visibility change (pause auto-save when tab hidden)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('⏸️ Tab hidden - pausing auto-save');
+                if (BleedingBorderlandsApp.dataManager) {
+                    BleedingBorderlandsApp.dataManager.stopAutoSave();
+                }
+            } else {
+                console.log('▶️ Tab visible - resuming auto-save');
+                if (BleedingBorderlandsApp.dataManager) {
+                    BleedingBorderlandsApp.dataManager.startAutoSave();
                 }
             }
         });
-
-        // Add helpful console messages
-        console.log('%c🗺️ Bleeding Borderlands Interactive Map', 'font-size: 20px; font-weight: bold; color: #D4AF37;');
-        console.log('%cKeyboard Shortcuts:', 'font-size: 14px; font-weight: bold; color: #8B6F47;');
-        console.log('C - Toggle Corruption Zones');
-        console.log('F - Toggle Faction Territories');
-        console.log('R - Toggle Trade Routes');
-        console.log('D - Toggle Distance Rings');
-        console.log('ESC - Close Detail Panel');
-        console.log('%cDebug Access:', 'font-size: 14px; font-weight: bold; color: #8B6F47; margin-top: 10px;');
-        console.log('window.mapRenderer - Access to map renderer');
-        console.log('window.interactionHandler - Access to interaction handler');
     </script>
 </body>
 </html>
