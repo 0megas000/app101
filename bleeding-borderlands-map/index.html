@@ -826,13 +826,13 @@
                 console.log('🎨 Initializing map renderer...');
                 this.mapRenderer = new MapRenderer(
                     this.config,
+                    this.dataManager.data.ocean,
+                    this.dataManager.data.coastline,
                     this.dataManager.data.locations,
                     this.dataManager.data.features,
                     this.dataManager.data.routes,
                     this.dataManager.data.factions,
-                    this.dataManager.data.corruption,
-                    this.dataManager.data.ocean,
-                    this.dataManager.data.coastline
+                    this.dataManager.data.corruption
                 );
 
                 const container = document.getElementById('map-svg-container');
@@ -851,9 +851,9 @@
 
                 console.log('🎛️ Initializing UI controls...');
                 this.uiControls = new UIControls(
-                    this.dataManager,
                     this.mapRenderer,
                     this.panZoom,
+                    this.dataManager,
                     this.locationEditor
                 );
                 this.uiControls.initialize();
