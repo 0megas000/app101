@@ -41,13 +41,13 @@ class LocationEditor {
   // Setup all event listeners
   setupEventListeners() {
     // Add location button
-    const addBtn = document.getElementById('add-location-btn');
+    const addBtn = document.getElementById('btn-add-location');
     if (addBtn) {
       addBtn.addEventListener('click', () => this.showAddLocationModal());
     }
 
     // Edit mode toggle
-    const editModeToggle = document.getElementById('edit-mode-toggle');
+    const editModeToggle = document.getElementById('toggle-edit-mode');
     if (editModeToggle) {
       editModeToggle.addEventListener('change', (e) => this.toggleEditMode(e.target.checked));
     }
@@ -116,10 +116,11 @@ class LocationEditor {
     if (title) title.textContent = 'Add New Location';
 
     // Show modal
+    this.editorModal.style.display = 'flex';
     this.editorModal.classList.remove('hidden');
 
     // Focus name field
-    const nameField = document.getElementById('location-name');
+    const nameField = document.getElementById('edit-name');
     if (nameField) nameField.focus();
   }
 
@@ -138,13 +139,9 @@ class LocationEditor {
 
     // Pre-fill form with clicked position
     this.showAddLocationModal();
-    document.getElementById('location-name').value = name;
-    document.getElementById('location-x').value = realPos.x.toFixed(1);
-    document.getElementById('location-y').value = realPos.y.toFixed(1);
-
-    // Estimate elevation based on position
-    const estimatedElevation = this.estimateElevation(realPos.x, realPos.y);
-    document.getElementById('location-elevation').value = estimatedElevation;
+    document.getElementById('edit-name').value = name;
+    document.getElementById('edit-x').value = realPos.x.toFixed(1);
+    document.getElementById('edit-y').value = realPos.y.toFixed(1);
   }
 
   // === EDIT LOCATION ===
@@ -162,33 +159,24 @@ class LocationEditor {
     if (title) title.textContent = `Edit: ${location.name}`;
 
     // Show modal
+    this.editorModal.style.display = 'flex';
     this.editorModal.classList.remove('hidden');
   }
 
   // Populate form with location data
   populateForm(location) {
-    document.getElementById('location-name').value = location.name || '';
-    document.getElementById('location-emoji').value = location.emoji || '';
-    document.getElementById('location-type').value = location.type || 'location-custom';
-    document.getElementById('location-x').value = location.position?.x || 0;
-    document.getElementById('location-y').value = location.position?.y || 0;
-    document.getElementById('location-elevation').value = location.elevation || 0;
-    document.getElementById('location-population').value = location.population || '';
-    document.getElementById('location-corruption').value = location.corruption || 0;
-    document.getElementById('location-faction').value = location.faction || 'none';
-    document.getElementById('location-description').value = location.description || '';
-    document.getElementById('location-secret').checked = location.secret || false;
-
-    // Features (convert array to newline-separated text)
-    const featuresText = (location.features || []).join('\n');
-    document.getElementById('location-features').value = featuresText;
-
-    // NPCs (convert array to newline-separated text)
-    const npcsText = (location.npcs || []).join('\n');
-    document.getElementById('location-npcs').value = npcsText;
-
-    // Connected locations (populate checkboxes)
-    this.populateConnectedLocations(location.connectedTo || []);
+    document.getElementById('edit-name').value = location.name || '';
+    document.getElementById('edit-type').value = location.type || 'city';
+    document.getElementById('edit-x').value = location.position?.x || 0;
+    document.getElementById('edit-y').value = location.position?.y || 0;
+    document.getElementById('edit-population').value = location.population || '';
+    document.getElementById('edit-corruption').value = location.corruption || 0;
+    document.getElementById('edit-faction').value = location.faction || '';
+    document.getElementById('edit-description').value = location.description || '';
+    document.getElementById('edit-secret').checked = location.secret || false;
+    document.getElementById('edit-important').checked = location.important || false;
+    document.getElementById('edit-discovered').checked = location.discovered !== false;
+    document.getElementById('edit-notes').value = location.notes || '';
   }
 
   // Populate connected locations checkboxes
@@ -280,36 +268,21 @@ class LocationEditor {
   collectFormData() {
     // Get basic fields
     const data = {
-      name: document.getElementById('location-name').value.trim(),
-      emoji: document.getElementById('location-emoji').value.trim(),
-      type: document.getElementById('location-type').value,
+      name: document.getElementById('edit-name').value.trim(),
+      type: document.getElementById('edit-type').value,
       position: {
-        x: parseFloat(document.getElementById('location-x').value),
-        y: parseFloat(document.getElementById('location-y').value)
+        x: parseFloat(document.getElementById('edit-x').value),
+        y: parseFloat(document.getElementById('edit-y').value)
       },
-      elevation: parseInt(document.getElementById('location-elevation').value) || 0,
-      population: parseInt(document.getElementById('location-population').value) || undefined,
-      corruption: parseInt(document.getElementById('location-corruption').value) || 0,
-      faction: document.getElementById('location-faction').value,
-      description: document.getElementById('location-description').value.trim(),
-      secret: document.getElementById('location-secret').checked
+      population: parseInt(document.getElementById('edit-population').value) || undefined,
+      corruption: parseInt(document.getElementById('edit-corruption').value) || 0,
+      faction: document.getElementById('edit-faction').value || undefined,
+      description: document.getElementById('edit-description').value.trim(),
+      secret: document.getElementById('edit-secret').checked,
+      important: document.getElementById('edit-important').checked,
+      discovered: document.getElementById('edit-discovered').checked,
+      notes: document.getElementById('edit-notes').value.trim()
     };
-
-    // Parse features (one per line)
-    const featuresText = document.getElementById('location-features').value;
-    data.features = featuresText.split('\n')
-      .map(f => f.trim())
-      .filter(f => f.length > 0);
-
-    // Parse NPCs (one per line)
-    const npcsText = document.getElementById('location-npcs').value;
-    data.npcs = npcsText.split('\n')
-      .map(n => n.trim())
-      .filter(n => n.length > 0);
-
-    // Get connected locations
-    const connectedCheckboxes = document.querySelectorAll('#connected-locations-list input[type="checkbox"]:checked');
-    data.connectedTo = Array.from(connectedCheckboxes).map(cb => cb.value);
 
     // Preserve existing ID if editing
     if (this.currentLocation) {
@@ -406,6 +379,7 @@ class LocationEditor {
   // Hide editor modal
   hideEditorModal() {
     if (this.editorModal) {
+      this.editorModal.style.display = 'none';
       this.editorModal.classList.add('hidden');
     }
     this.currentLocation = null;

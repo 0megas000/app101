@@ -54,32 +54,35 @@ class UIControls {
       toggleCorruption: document.getElementById('toggle-corruption'),
       toggleFactions: document.getElementById('toggle-factions'),
       toggleRoutes: document.getElementById('toggle-routes'),
-      toggleDistance: document.getElementById('toggle-distance'),
+      toggleDistance: document.getElementById('toggle-distance-rings'),
       toggleSecrets: document.getElementById('toggle-secrets'),
-      editModeToggle: document.getElementById('edit-mode-toggle'),
+      toggleLabels: document.getElementById('toggle-labels'),
+      editModeToggle: document.getElementById('toggle-edit-mode'),
 
       // Zoom controls
-      zoomIn: document.getElementById('zoom-in'),
-      zoomOut: document.getElementById('zoom-out'),
-      zoomReset: document.getElementById('zoom-reset'),
-      zoomDisplay: document.getElementById('zoom-display'),
+      zoomIn: document.getElementById('btn-zoom-in'),
+      zoomOut: document.getElementById('btn-zoom-out'),
+      zoomReset: document.getElementById('btn-zoom-reset'),
+      zoomDisplay: document.getElementById('zoom-level'),
 
       // Save controls
-      saveButton: document.getElementById('save-button'),
-      saveStatus: document.getElementById('save-status'),
-      exportButton: document.getElementById('export-button'),
-      importButton: document.getElementById('import-button'),
-      importFileInput: document.getElementById('import-file-input'),
+      saveButton: document.getElementById('btn-manual-save'),
+      saveStatus: document.getElementById('save-status-text'),
+      exportButton: document.getElementById('btn-export-json'),
+      importButton: document.getElementById('btn-import-json'),
+      importFileInput: document.getElementById('hidden-file-input'),
 
       // Search/filter
       searchInput: document.getElementById('location-search'),
       filterDropdown: document.getElementById('location-filter'),
 
       // Misc
-      fullscreenButton: document.getElementById('fullscreen-button'),
-      helpButton: document.getElementById('help-button'),
-      collapseSidebarLeft: document.getElementById('collapse-sidebar-left'),
-      collapseSidebarRight: document.getElementById('collapse-sidebar-right')
+      helpButton: document.getElementById('btn-help'),
+      collapseSidebarLeft: document.getElementById('toggle-left-sidebar'),
+      collapseSidebarRight: document.getElementById('toggle-right-sidebar'),
+      undoButton: document.getElementById('btn-undo'),
+      redoButton: document.getElementById('btn-redo'),
+      resetButton: document.getElementById('btn-reset-data')
     };
 
     this.sidebars.left = this.elements.leftSidebar;
@@ -555,8 +558,9 @@ class UIControls {
   }
 
   closeAllModals() {
-    const modals = document.querySelectorAll('.modal:not(.hidden)');
+    const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
+      modal.style.display = 'none';
       modal.classList.add('hidden');
     });
   }
@@ -604,7 +608,7 @@ class UIControls {
         <div class="modal-content">
           <div class="modal-header">
             <h2 class="modal-title">${title}</h2>
-            <button class="close-btn" onclick="this.closest('.modal').classList.add('hidden')">&times;</button>
+            <button class="close-btn" onclick="const m=this.closest('.modal'); m.style.display='none'; m.classList.add('hidden');">&times;</button>
           </div>
           <div class="modal-body">${content}</div>
         </div>
@@ -615,11 +619,13 @@ class UIControls {
       modal.querySelector('.modal-body').innerHTML = content;
     }
 
+    modal.style.display = 'flex';
     modal.classList.remove('hidden');
 
     // Close on outside click
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
+        modal.style.display = 'none';
         modal.classList.add('hidden');
       }
     });

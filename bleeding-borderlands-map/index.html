@@ -826,13 +826,13 @@
                 console.log('🎨 Initializing map renderer...');
                 this.mapRenderer = new MapRenderer(
                     this.config,
+                    this.dataManager.data.ocean,
+                    this.dataManager.data.coastline,
                     this.dataManager.data.locations,
                     this.dataManager.data.features,
                     this.dataManager.data.routes,
                     this.dataManager.data.factions,
-                    this.dataManager.data.corruption,
-                    this.dataManager.data.ocean,
-                    this.dataManager.data.coastline
+                    this.dataManager.data.corruption
                 );
 
                 const container = document.getElementById('map-svg-container');
@@ -851,9 +851,9 @@
 
                 console.log('🎛️ Initializing UI controls...');
                 this.uiControls = new UIControls(
-                    this.dataManager,
                     this.mapRenderer,
                     this.panZoom,
+                    this.dataManager,
                     this.locationEditor
                 );
                 this.uiControls.initialize();
@@ -861,12 +861,94 @@
                 // Setup event listeners
                 this.setupEventListeners();
 
+                // Setup modal close buttons
+                this.setupModalHandlers();
+
                 // Initial render
                 console.log('🖼️ Rendering map...');
                 this.mapRenderer.render();
 
                 console.log('%c✓ Application initialized successfully!', 'color: #228B22; font-weight: bold; font-size: 14px;');
                 this.printDebugInfo();
+            },
+
+            // Setup modal handlers
+            setupModalHandlers() {
+                // Help modal close buttons
+                const helpCloseBtn = document.getElementById('help-close-btn');
+                const helpCloseBtn2 = document.getElementById('help-close-btn-2');
+                const helpModal = document.getElementById('help-modal');
+
+                if (helpCloseBtn && helpModal) {
+                    helpCloseBtn.addEventListener('click', () => {
+                        helpModal.style.display = 'none';
+                        helpModal.classList.add('hidden');
+                    });
+                }
+
+                if (helpCloseBtn2 && helpModal) {
+                    helpCloseBtn2.addEventListener('click', () => {
+                        helpModal.style.display = 'none';
+                        helpModal.classList.add('hidden');
+                    });
+                }
+
+                // Import modal close buttons
+                const importCloseBtn = document.getElementById('import-close-btn');
+                const importCancelBtn = document.getElementById('import-cancel-btn');
+                const importModal = document.getElementById('import-modal');
+
+                if (importCloseBtn && importModal) {
+                    importCloseBtn.addEventListener('click', () => {
+                        importModal.style.display = 'none';
+                        importModal.classList.add('hidden');
+                    });
+                }
+
+                if (importCancelBtn && importModal) {
+                    importCancelBtn.addEventListener('click', () => {
+                        importModal.style.display = 'none';
+                        importModal.classList.add('hidden');
+                    });
+                }
+
+                // Help button in header
+                const btnHelp = document.getElementById('btn-help');
+                if (btnHelp && helpModal) {
+                    btnHelp.addEventListener('click', () => {
+                        helpModal.style.display = 'flex';
+                        helpModal.classList.remove('hidden');
+                    });
+                }
+
+                // Import button in header
+                const btnImport = document.getElementById('btn-import');
+                if (btnImport && importModal) {
+                    btnImport.addEventListener('click', () => {
+                        importModal.style.display = 'flex';
+                        importModal.classList.remove('hidden');
+                    });
+                }
+
+                // Close modals on outside click
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.style.display = 'none';
+                            modal.classList.add('hidden');
+                        }
+                    });
+                });
+
+                // Close modals on ESC key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.modal').forEach(modal => {
+                            modal.style.display = 'none';
+                            modal.classList.add('hidden');
+                        });
+                    }
+                });
             },
 
             // Setup global event listeners
