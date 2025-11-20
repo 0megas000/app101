@@ -1,0 +1,1 @@
+to explore a new mine opening where a general will lead adventures to a newly open tunnel spawned from corruption.: the PC can run into a large chamber that holds a group of cultists who have planned on completely taking over the city with a new corruption device or bomb or ritual and players can help or stop it 
