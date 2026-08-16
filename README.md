@@ -12,23 +12,28 @@ today and real augers, load cells, and payment terminals later.
 
 ## Quick start
 
-Requires **Node 20+** and **PostgreSQL 14+**.
+Requires **Node 20+** and a running **PostgreSQL 14+**.
 
 ```bash
-# 1. Install
+# 1. Get the code
+git clone https://github.com/0megas000/app101.git
+cd app101
+
+# 2. Install (also generates the Prisma client)
 npm install
 
-# 2. Configure
-cp server/.env.example server/.env      # edit DATABASE_URL if needed
+# 3. Create the database role and database
+psql -d postgres -c "CREATE USER preworkout WITH PASSWORD 'preworkout_dev';" \
+                 -c "CREATE DATABASE preworkout OWNER preworkout;"
 
-# 3. Create the database (skip if it already exists)
-createdb preworkout
+# 4. Configure
+cp server/.env.example server/.env
 
-# 4. Migrate + seed demo data (10 products, 30 days of history)
+# 5. Create the tables and load demo data (10 products, 30 days of history)
 npm run db:migrate
 npm run db:seed
 
-# 5. Run both apps
+# 6. Run both apps
 npm run dev
 ```
 
@@ -37,6 +42,36 @@ npm run dev
 | Customer kiosk | http://localhost:5173 |
 | Admin dashboard | http://localhost:5173/admin |
 | API | http://localhost:4000/api |
+
+<details>
+<summary>Setup troubleshooting</summary>
+
+**`psql: command not found`** — Postgres isn't installed or isn't on your PATH.
+macOS: `brew install postgresql@16 && brew services start postgresql@16`.
+Ubuntu/Debian: `sudo apt install postgresql && sudo service postgresql start`.
+
+**Step 3 fails with a permission or authentication error** — you need to run it as a
+Postgres superuser. On Linux that's usually
+`sudo -u postgres psql -c "CREATE USER …" -c "CREATE DATABASE …"`. On a Homebrew install
+your own account is normally the superuser, so the command as written works.
+
+**You'd rather use an existing Postgres login** — skip step 3, create an empty database,
+and point `DATABASE_URL` in `server/.env` at it. Nothing else depends on those credentials.
+
+**`P1000: Authentication failed`** — `DATABASE_URL` doesn't match a real role/password.
+
+**`P1001: Can't reach database server`** — Postgres isn't running, or is on a different port.
+
+**Ports 4000 or 5173 already in use** — change `PORT` in `server/.env` (the web dev server
+proxies to it via `web/vite.config.ts`) or pass `--port` to Vite.
+
+**Changing the schema during development** — use `npm run db:migrate:dev`, which creates a
+new migration. It needs a role with `CREATEDB` (Prisma uses a shadow database), so grant it
+with `ALTER ROLE preworkout CREATEDB;`. Plain `npm run db:migrate` only applies existing
+migrations and needs no extra rights.
+
+**Start over** — `npm run db:reset` re-applies migrations and reseeds.
+</details>
 
 ### Demo credentials
 
