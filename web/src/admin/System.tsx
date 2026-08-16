@@ -4,6 +4,10 @@ import { Spinner, ErrorBox } from "../design/components";
 
 // ── Promotions / idle screen playlist (spec §21) ─────────────────────
 
+// Promotions store a literal hex — it is persisted and validated server-side
+// against /^#[0-9a-fA-F]{6}$/, so it must never be a CSS variable.
+const DEFAULT_ACCENT = "#7c5cff";
+
 interface Promotion {
   id: string;
   kind: string;
@@ -19,7 +23,7 @@ export function PromotionsPage() {
   const [items, setItems] = useState<Promotion[] | null>(null);
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [draft, setDraft] = useState({ title: "", subtitle: "", accentColor: "var(--accent)" });
+  const [draft, setDraft] = useState({ title: "", subtitle: "", accentColor: DEFAULT_ACCENT });
 
   const load = () => {
     setError(false);
@@ -61,7 +65,7 @@ export function PromotionsPage() {
           active: true,
         }),
       });
-      setDraft({ title: "", subtitle: "", accentColor: "var(--accent)" });
+      setDraft({ title: "", subtitle: "", accentColor: DEFAULT_ACCENT });
       load();
     } finally { setBusy(false); }
   };

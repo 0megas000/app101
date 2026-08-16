@@ -233,6 +233,27 @@ await page.waitForTimeout(1600);
 await page.getByText("Overview").first().waitFor({ timeout: 8000 });
 ok("admin PIN login");
 
+// Admin writes, not just reads. Viewing a page proves nothing about whether
+// its forms work — a promotion create regressed once behind a green suite.
+await page.getByRole("link", { name: "Promotions" }).click();
+await page.waitForTimeout(1300);
+const promoTitle = `Smoke slide ${Date.now()}`;
+await page.getByPlaceholder("Headline", { exact: false }).fill(promoTitle);
+await page.getByPlaceholder("Subtitle").fill("created by the smoke test");
+await page.getByRole("button", { name: "Add slide" }).click();
+await page.waitForTimeout(1500);
+const created = await page.getByText(promoTitle).isVisible().catch(() => false);
+created ? ok("admin: create a promotion") : bad("admin: create a promotion");
+
+if (created) {
+  const row = page.locator("tr").filter({ hasText: promoTitle });
+  await row.getByRole("button", { name: "Delete" }).click();
+  await page.waitForTimeout(1300);
+  (await page.getByText(promoTitle).isVisible().catch(() => false))
+    ? bad("admin: delete a promotion")
+    : ok("admin: delete a promotion");
+}
+
 const sections = [
   ["Sales Analytics", "Revenue by day"],
   ["Product Analytics", "Revenue by product"],
