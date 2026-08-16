@@ -1,3 +1,4 @@
+import "./lib/env.js"; // must be first — populates process.env before anything reads it
 import { createServer } from "node:http";
 import express from "express";
 import { config } from "./config.js";

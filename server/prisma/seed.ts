@@ -5,6 +5,7 @@
  *
  * All brands and products are fictional (spec §29).
  */
+import "../src/lib/env.js"; // must be first — populates DATABASE_URL before Prisma initialises
 import { PrismaClient, UserRole, StrengthLevel, IngredientCategory, WarningSeverity, TransactionStatus } from "@prisma/client";
 import { createHash, randomUUID } from "node:crypto";
 
