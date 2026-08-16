@@ -35,23 +35,23 @@ export function DetailScreen() {
       <div style={{ display: "flex", gap: 28, flexWrap: "wrap" }}>
         <ProductArt imageKey={detail.imageKey} accentColor={detail.accentColor} size={168} radius={30} />
         <div style={{ flex: 1, minWidth: 280 }}>
-          <div style={{ fontSize: 13, color: "var(--ink-3)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>{detail.brand}</div>
-          <h2 style={{ fontSize: 40, fontWeight: 900, lineHeight: 1.05 }}>{detail.name}</h2>
-          <div style={{ fontSize: 19, color: "var(--ink-2)", marginBottom: 10 }}>{detail.flavor}</div>
+          <div style={{ fontSize: 13, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>{detail.brand}</div>
+          <h2 style={{ fontSize: 40, fontWeight: 750, lineHeight: 1.05 }}>{detail.name}</h2>
+          <div style={{ fontSize: 19, color: "var(--text-2)", marginBottom: 10 }}>{detail.flavor}</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
             <StrengthBadge strength={detail.strength} />
-            <span className="pill" style={{ background: detail.isStimulant ? "rgba(236,131,90,0.18)" : "rgba(12,163,12,0.18)", color: detail.isStimulant ? "#ec835a" : "#0ca30c" }}>
+            <span className="pill" style={{ background: detail.isStimulant ? "var(--serious-soft)" : "var(--good-soft)", color: detail.isStimulant ? "var(--serious-fg)" : "var(--good-fg)" }}>
               {detail.isStimulant ? "⚡ Stimulant" : "🌙 Non-stim"}
             </span>
-            <span className="pill" style={{ background: "var(--bg-2)", color: "var(--ink-2)" }}>{tingleText}</span>
-            {detail.dietary?.vegan ? <span className="pill" style={{ background: "rgba(12,163,12,0.14)", color: "#0ca30c" }}>Vegan</span> : null}
-            {detail.dietary?.dyeFree ? <span className="pill" style={{ background: "var(--bg-2)", color: "var(--ink-2)" }}>Dye-free</span> : null}
+            <span className="pill" style={{ background: "var(--surface-2)", color: "var(--text-2)" }}>{tingleText}</span>
+            {detail.dietary?.vegan ? <span className="pill" style={{ background: "var(--good-soft)", color: "var(--good-fg)" }}>Vegan</span> : null}
+            {detail.dietary?.dyeFree ? <span className="pill" style={{ background: "var(--surface-2)", color: "var(--text-2)" }}>Dye-free</span> : null}
           </div>
-          <p style={{ color: "var(--ink-2)", fontSize: 16, lineHeight: 1.55, maxWidth: 640 }}>{detail.description}</p>
+          <p style={{ color: "var(--text-2)", fontSize: 16, lineHeight: 1.55, maxWidth: 640 }}>{detail.description}</p>
           <div style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 16, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 30, fontWeight: 900, color: "var(--brand-2)" }}>
+            <div style={{ fontSize: 30, fontWeight: 750, letterSpacing: "-0.03em" }}>
               ${(detail.pricePerScoopCents / 100).toFixed(2)}
-              <span style={{ fontSize: 14, color: "var(--ink-3)", fontWeight: 500 }}> / scoop · {detail.servingSizeGrams} g</span>
+              <span style={{ fontSize: 14, color: "var(--text-3)", fontWeight: 500 }}> / scoop · {detail.servingSizeGrams} g</span>
             </div>
             <button className={`btn ${inCart ? "btn-ghost" : "btn-primary"}`} disabled={!detail.available}
               onClick={() => { if (!inCart) addToCart(detail.id); go("cart"); }}>
@@ -72,12 +72,12 @@ export function DetailScreen() {
         {detail.majorIngredients.map((mi) => (
           <div key={mi.ingredientId} className="card" style={{ padding: 18, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
             <div>
-              <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{mi.name}</div>
-              <div style={{ fontSize: 24, fontWeight: 900, marginTop: 2 }}>{mi.amountPerScoop} {mi.unit}</div>
+              <div style={{ fontSize: 12, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>{mi.name}</div>
+              <div style={{ fontSize: 24, fontWeight: 750, marginTop: 2 }}>{mi.amountPerScoop} {mi.unit}</div>
             </div>
             <button
               className="btn btn-ghost"
-              style={{ minHeight: 48, minWidth: 48, borderRadius: "50%", padding: 0, fontSize: 18, fontWeight: 800, color: "var(--brand-2)" }}
+              style={{ minHeight: 48, minWidth: 48, borderRadius: "50%", padding: 0, fontSize: 18, fontWeight: 700, color: "var(--accent)" }}
               onClick={() => openIngredient(mi.ingredientId, mi.name)}
               aria-label={`Learn about ${mi.name}`}
             >
@@ -96,7 +96,7 @@ export function DetailScreen() {
                 <SeverityPill severity={w.severity} />
                 <div>
                   <div style={{ fontWeight: 700 }}>{w.title}</div>
-                  <div style={{ color: "var(--ink-2)", fontSize: 14, marginTop: 2 }}>{w.body}</div>
+                  <div style={{ color: "var(--text-2)", fontSize: 14, marginTop: 2 }}>{w.body}</div>
                 </div>
               </div>
             ))}
@@ -110,8 +110,8 @@ export function DetailScreen() {
 
       {showFacts && (
         <Modal onClose={() => setShowFacts(false)}>
-          <h3 style={{ fontSize: 24, fontWeight: 900, marginBottom: 4 }}>Supplement Facts</h3>
-          <div style={{ color: "var(--ink-2)", marginBottom: 16 }}>{detail.brand} {detail.name} — per {detail.servingSizeGrams} g scoop</div>
+          <h3 style={{ fontSize: 24, fontWeight: 750, marginBottom: 4 }}>Supplement Facts</h3>
+          <div style={{ color: "var(--text-2)", marginBottom: 16 }}>{detail.brand} {detail.name} — per {detail.servingSizeGrams} g scoop</div>
           <table className="table">
             <tbody>
               {detail.supplementFacts.map((f, i) => (
@@ -128,7 +128,7 @@ export function DetailScreen() {
 
       {ingredient && (
         <Modal onClose={() => setIngredient(null)}>
-          <h3 style={{ fontSize: 28, fontWeight: 900 }}>{ingredient.name}</h3>
+          <h3 style={{ fontSize: 28, fontWeight: 750 }}>{ingredient.name}</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 18, marginTop: 18 }}>
             <InfoBlock title="What does it do?" body={ingredient.plainExplanation} />
             <InfoBlock title="What might you feel?" body={ingredient.sensation} />
@@ -153,7 +153,7 @@ export function DetailScreen() {
 function RatingRow({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <>
-      <div style={{ color: "var(--ink-3)", fontWeight: 700, fontSize: 12, letterSpacing: "0.08em" }}>{label}</div>
+      <div style={{ color: "var(--text-3)", fontWeight: 700, fontSize: 12, letterSpacing: "0.08em" }}>{label}</div>
       <Dots value={value} color={color} />
     </>
   );
@@ -162,8 +162,8 @@ function RatingRow({ label, value, color }: { label: string; value: number; colo
 function InfoBlock({ title, body }: { title: string; body: string }) {
   return (
     <div>
-      <div style={{ fontWeight: 800, marginBottom: 4, color: "var(--brand-2)" }}>{title}</div>
-      <div style={{ color: "var(--ink-2)", lineHeight: 1.55 }}>{body}</div>
+      <div style={{ fontWeight: 700, marginBottom: 4, color: "var(--accent)" }}>{title}</div>
+      <div style={{ color: "var(--text-2)", lineHeight: 1.55 }}>{body}</div>
     </div>
   );
 }

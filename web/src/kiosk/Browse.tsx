@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useKiosk } from "./KioskApp";
 import type { ProductCard } from "../api/client";
-import { ProductArt, Dots } from "../design/components";
+import { ProductArt, Dots, EmptyState } from "../design/components";
 
 /** Filter chips — driven by product tags plus metadata-derived filters (spec §3). */
 const FILTER_ORDER = [
@@ -16,9 +16,9 @@ export function BrowseScreen() {
   const [compareMode, setCompareMode] = useState(false);
 
   const chips = useMemo(() => {
-    const withProducts = new Set(products.flatMap((p) => p.tags.map((t) => t.slug)));
+    const present = new Set(products.flatMap((p) => p.tags.map((t) => t.slug)));
     return FILTER_ORDER
-      .filter((slug) => withProducts.has(slug))
+      .filter((slug) => present.has(slug))
       .map((slug) => ({ slug, label: bootstrap.tags.find((t) => t.slug === slug)?.label ?? slug }));
   }, [products, bootstrap.tags]);
 
@@ -36,59 +36,73 @@ export function BrowseScreen() {
   };
 
   const toggleCompare = (id: string) => {
-    setCompareIds(
-      compareIds.includes(id) ? compareIds.filter((x) => x !== id) : [...compareIds, id].slice(-2),
-    );
+    setCompareIds(compareIds.includes(id) ? compareIds.filter((x) => x !== id) : [...compareIds, id].slice(-2));
   };
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, marginBottom: 8 }}>
-        <h2 style={{ fontSize: 28, fontWeight: 900 }}>Choose your pre-workout</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 12, marginBottom: 4 }}>
+        <div>
+          <h2 style={{ fontSize: 30, fontWeight: 750, letterSpacing: "-0.03em" }}>Choose your pre-workout</h2>
+          <p style={{ color: "var(--text-2)", fontSize: 14.5, marginTop: 3 }}>
+            {filtered.length} {filtered.length === 1 ? "option" : "options"}
+            {active.length > 0 ? " matching your filters" : " available now"}
+          </p>
+        </div>
         <button
-          className={`filter-chip ${compareMode ? "active" : ""}`}
+          className={`chip ${compareMode ? "active" : ""}`}
           onClick={() => { setCompareMode(!compareMode); setCompareIds([]); }}
         >
-          ⚖️ {compareMode ? "Cancel compare" : "Compare products"}
+          ⚖ {compareMode ? "Cancel compare" : "Compare"}
         </button>
       </div>
 
       <div className="filter-row">
-        <button className={`filter-chip ${active.length === 0 ? "active" : ""}`} onClick={() => setActive([])}>
-          All Pre-Workouts
+        <button className={`chip ${active.length === 0 ? "active" : ""}`} onClick={() => setActive([])}>
+          All
         </button>
         {chips.map((c) => (
-          <button key={c.slug} className={`filter-chip ${active.includes(c.slug) ? "active" : ""}`} onClick={() => toggleFilter(c.slug)}>
+          <button key={c.slug} className={`chip ${active.includes(c.slug) ? "active" : ""}`} onClick={() => toggleFilter(c.slug)}>
             {c.label}
           </button>
         ))}
       </div>
 
       {compareMode ? (
-        <div className="card" style={{ padding: "12px 20px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", borderColor: "var(--brand)" }}>
-          <span style={{ color: "var(--ink-2)" }}>
-            {compareIds.length === 0 ? "Tap two products to compare them side by side." : compareIds.length === 1 ? "Pick one more product." : "Ready to compare!"}
+        <div
+          className="card fade-in"
+          style={{ padding: "12px 18px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", borderColor: "var(--accent)", background: "var(--accent-soft)" }}
+        >
+          <span style={{ color: "var(--text-2)", fontSize: 14.5 }}>
+            {compareIds.length === 0 ? "Tap two products to compare them side by side."
+              : compareIds.length === 1 ? "Pick one more product."
+              : "Ready to compare."}
           </span>
-          <button className="btn btn-primary btn-sm" disabled={compareIds.length !== 2} onClick={() => {
-            track("products_compared", { productIds: compareIds });
-            go("compare");
-          }}>
+          <button
+            className="btn btn-primary btn-sm"
+            disabled={compareIds.length !== 2}
+            onClick={() => { track("products_compared", { productIds: compareIds }); go("compare"); }}
+          >
             Compare →
           </button>
         </div>
       ) : null}
 
       {filtered.length === 0 ? (
-        <div className="card" style={{ padding: 40, textAlign: "center", color: "var(--ink-2)" }}>
-          No products match those filters. Try removing one.
-        </div>
+        <EmptyState
+          icon="🔍"
+          title="Nothing matches those filters"
+          body="Try removing one to widen the search."
+          action={<button className="btn btn-ghost" onClick={() => setActive([])}>Clear filters</button>}
+        />
       ) : (
-        <div className="product-grid">
-          {filtered.map((p) => (
+        <div className="product-grid stagger" key={active.join(",")}>
+          {filtered.map((p, i) => (
             <ProductCardView
               key={p.id}
+              index={i}
               product={p}
-              inCart={cart.some((i) => i.productId === p.id)}
+              inCart={cart.some((c) => c.productId === p.id)}
               compareMode={compareMode}
               compareSelected={compareIds.includes(p.id)}
               onTap={() => (compareMode ? toggleCompare(p.id) : openProduct(p.id))}
@@ -102,71 +116,92 @@ export function BrowseScreen() {
 }
 
 export function StrengthBadge({ strength }: { strength: ProductCard["strength"] }) {
-  const map = { BEGINNER: ["Beginner", "#0ca30c"], INTERMEDIATE: ["Intermediate", "#fab219"], ADVANCED: ["Advanced", "#d03b3b"] } as const;
-  const [label, color] = map[strength];
-  return <span className="pill" style={{ background: `${color}22`, color }}>{label}</span>;
+  const map = {
+    BEGINNER: ["Beginner", "var(--good-fg)", "var(--good-soft)"],
+    INTERMEDIATE: ["Intermediate", "var(--warn-fg)", "var(--warn-soft)"],
+    ADVANCED: ["Advanced", "var(--serious-fg)", "var(--serious-soft)"],
+  } as const;
+  const [label, fg, bg] = map[strength];
+  return <span className="pill" style={{ background: bg, color: fg }}>{label}</span>;
 }
 
-function ProductCardView({ product: p, inCart, compareMode, compareSelected, onTap, onAdd }: {
+function ProductCardView({ product: p, index, inCart, compareMode, compareSelected, onTap, onAdd }: {
   product: ProductCard;
+  index: number;
   inCart: boolean;
   compareMode: boolean;
   compareSelected: boolean;
   onTap: () => void;
   onAdd: () => void;
 }) {
+  const hasBadge = p.featured || p.staffPick;
   return (
     <div
-      className="card fade-in"
+      className={`card ${p.available ? "card-interactive" : ""}`}
       onClick={p.available ? onTap : undefined}
       style={{
-        padding: 20, cursor: p.available ? "pointer" : "default",
-        opacity: p.available ? 1 : 0.45,
-        outline: compareSelected ? "2.5px solid var(--brand)" : "none",
+        padding: "12px 18px 18px",
+        opacity: p.available ? 1 : 0.5,
+        borderColor: compareSelected ? "var(--accent)" : undefined,
+        boxShadow: compareSelected ? "var(--shadow-accent)" : undefined,
         position: "relative",
-        display: "flex", flexDirection: "column",
+        display: "flex",
+        flexDirection: "column",
+        ["--i" as string]: index,
       }}
     >
-      {(p.featured || p.staffPick) && (
-        <span className="pill" style={{ position: "absolute", top: 14, right: 14, background: "rgba(124,92,255,0.2)", color: "var(--brand-2)" }}>
-          {p.staffPick ? "★ Staff pick" : "Featured"}
-        </span>
-      )}
-      <div style={{ display: "flex", gap: 16 }}>
-        <ProductArt imageKey={p.imageKey} accentColor={p.accentColor} />
-        <div style={{ minWidth: 0, paddingRight: p.featured || p.staffPick ? 96 : 0 }}>
-          <div style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>{p.brand}</div>
-          <div style={{ fontSize: 21, fontWeight: 800, lineHeight: 1.2 }}>{p.name}</div>
-          <div style={{ fontSize: 14, color: "var(--ink-2)" }}>{p.flavor}</div>
-          <div style={{ fontSize: 16, fontWeight: 800, marginTop: 6, color: "var(--brand-2)" }}>
-            ${(p.pricePerScoopCents / 100).toFixed(2)} <span style={{ fontSize: 12, color: "var(--ink-3)", fontWeight: 500 }}>/ scoop</span>
+      {/* Reserved badge row — always present so every card aligns, whether
+          or not this product carries a badge. */}
+      <div style={{ height: 22, display: "flex", justifyContent: "flex-end", marginBottom: 4 }}>
+        {hasBadge && (
+          <span className="pill" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>
+            {p.staffPick ? "★ Staff pick" : "Featured"}
+          </span>
+        )}
+      </div>
+
+      <div style={{ display: "flex", gap: 14 }}>
+        <ProductArt imageKey={p.imageKey} accentColor={p.accentColor} size={84} />
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase" }}>{p.brand}</div>
+          <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1.15, marginTop: 1 }}>{p.name}</div>
+          <div style={{ fontSize: 13.5, color: "var(--text-2)" }}>{p.flavor}</div>
+          <div style={{ fontSize: 17, fontWeight: 700, marginTop: 6, letterSpacing: "-0.02em" }}>
+            ${(p.pricePerScoopCents / 100).toFixed(2)}
+            <span style={{ fontSize: 11.5, color: "var(--text-3)", fontWeight: 500 }}> / scoop</span>
           </div>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", margin: "16px 0 12px", fontSize: 12.5 }}>
-        <Metric label="ENERGY" value={<Dots value={p.energyRating} color={p.accentColor} />} />
-        <Metric label="PUMP" value={<Dots value={p.pumpRating} color={p.accentColor} />} />
-        <Metric label="TINGLING" value={<Dots value={p.tingleRating} color={p.accentColor} />} />
-        <Metric label="CAFFEINE" value={<b style={{ fontSize: 15 }}>{p.caffeineMgPerScoop > 0 ? `${p.caffeineMgPerScoop} mg` : "None"}</b>} />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "9px 14px", margin: "16px 0 13px" }}>
+        <Metric label="Energy" value={<Dots value={p.energyRating} color={p.accentColor} />} />
+        <Metric label="Pump" value={<Dots value={p.pumpRating} color={p.accentColor} />} />
+        <Metric label="Tingle" value={<Dots value={p.tingleRating} color={p.accentColor} />} />
+        <Metric
+          label="Caffeine"
+          value={<b style={{ fontSize: 14.5, letterSpacing: "-0.02em" }}>{p.caffeineMgPerScoop > 0 ? `${p.caffeineMgPerScoop} mg` : "None"}</b>}
+        />
       </div>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: "auto" }}>
+      <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginTop: "auto" }}>
         <StrengthBadge strength={p.strength} />
-        <span className="pill" style={{ background: p.isStimulant ? "rgba(236,131,90,0.18)" : "rgba(12,163,12,0.18)", color: p.isStimulant ? "#ec835a" : "#0ca30c" }}>
-          {p.isStimulant ? "⚡ Stim" : "🌙 Non-stim"}
+        <span className="pill" style={{
+          background: p.isStimulant ? "var(--serious-soft)" : "var(--good-soft)",
+          color: p.isStimulant ? "var(--serious-fg)" : "var(--good-fg)",
+        }}>
+          {p.isStimulant ? "⚡ Stim" : "☾ Non-stim"}
         </span>
-        {p.lowStock && p.available ? <span className="pill" style={{ background: "rgba(250,178,25,0.16)", color: "var(--warn)" }}>Low stock</span> : null}
-        {!p.available ? <span className="pill" style={{ background: "var(--bg-3)", color: "var(--ink-3)" }}>Sold out</span> : null}
+        {p.lowStock && p.available ? <span className="pill" style={{ background: "var(--warn-soft)", color: "var(--warn-fg)" }}>Low stock</span> : null}
+        {!p.available ? <span className="pill" style={{ background: "var(--surface-3)", color: "var(--text-3)" }}>Sold out</span> : null}
       </div>
 
       {!compareMode && p.available ? (
         <button
           className={`btn ${inCart ? "btn-ghost" : "btn-primary"} btn-sm`}
-          style={{ width: "100%", marginTop: 14 }}
+          style={{ width: "100%", marginTop: 14, minHeight: 44 }}
           onClick={(e) => { e.stopPropagation(); if (!inCart) onAdd(); }}
         >
-          {inCart ? "✓ In your mix" : "+ Add to mix"}
+          {inCart ? "✓ In your mix" : "Add to mix"}
         </button>
       ) : null}
     </div>
@@ -176,7 +211,7 @@ function ProductCardView({ product: p, inCart, compareMode, compareSelected, onT
 function Metric({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <div style={{ color: "var(--ink-3)", fontWeight: 700, letterSpacing: "0.08em", fontSize: 10.5 }}>{label}</div>
+      <div style={{ color: "var(--text-3)", fontWeight: 650, letterSpacing: "0.06em", fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
       <div>{value}</div>
     </div>
   );

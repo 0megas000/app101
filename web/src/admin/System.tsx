@@ -19,7 +19,7 @@ export function PromotionsPage() {
   const [items, setItems] = useState<Promotion[] | null>(null);
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [draft, setDraft] = useState({ title: "", subtitle: "", accentColor: "#7c5cff" });
+  const [draft, setDraft] = useState({ title: "", subtitle: "", accentColor: "var(--accent)" });
 
   const load = () => {
     setError(false);
@@ -61,20 +61,20 @@ export function PromotionsPage() {
           active: true,
         }),
       });
-      setDraft({ title: "", subtitle: "", accentColor: "#7c5cff" });
+      setDraft({ title: "", subtitle: "", accentColor: "var(--accent)" });
       load();
     } finally { setBusy(false); }
   };
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900 }}>Promotions & Idle Screen</h1>
-      <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>Promotions & Idle Screen</h1>
+      <p style={{ color: "var(--text-3)", fontSize: 13.5, marginTop: 4 }}>
         The attract screen cycles through active entries in order. Product features show that product's artwork.
       </p>
 
       <div className="card" style={{ padding: 20, marginTop: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 12 }}>Add a message slide</h3>
+        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12 }}>Add a message slide</h3>
         <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.6fr auto auto", gap: 10, alignItems: "center" }}>
           <input placeholder="Headline (e.g. Need Energy?)" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
           <input placeholder="Subtitle" value={draft.subtitle} onChange={(e) => setDraft({ ...draft, subtitle: e.target.value })} />
@@ -89,12 +89,12 @@ export function PromotionsPage() {
           <tbody>
             {items.map((p) => (
               <tr key={p.id}>
-                <td style={{ color: "var(--ink-3)" }}>{p.sortOrder}</td>
-                <td style={{ fontSize: 12, color: "var(--ink-2)" }}>{p.kind.replace("_", " ").toLowerCase()}</td>
+                <td style={{ color: "var(--text-3)" }}>{p.sortOrder}</td>
+                <td style={{ fontSize: 12, color: "var(--text-2)" }}>{p.kind.replace("_", " ").toLowerCase()}</td>
                 <td style={{ fontWeight: 700 }}>{p.title}</td>
-                <td style={{ color: "var(--ink-2)", fontSize: 13, maxWidth: 320 }}>{p.subtitle ?? "—"}</td>
+                <td style={{ color: "var(--text-2)", fontSize: 13, maxWidth: 320 }}>{p.subtitle ?? "—"}</td>
                 <td><span style={{ display: "inline-block", width: 20, height: 20, borderRadius: 5, background: p.accentColor, verticalAlign: "middle" }} /></td>
-                <td>{p.active ? <span style={{ color: "var(--good)" }}>● Live</span> : <span style={{ color: "var(--ink-3)" }}>○ Paused</span>}</td>
+                <td>{p.active ? <span style={{ color: "var(--good-fg)" }}>● Live</span> : <span style={{ color: "var(--text-3)" }}>○ Paused</span>}</td>
                 <td style={{ whiteSpace: "nowrap" }}>
                   <button className="btn btn-ghost btn-sm" disabled={busy} onClick={() => toggle(p)}>{p.active ? "Pause" : "Activate"}</button>{" "}
                   <button className="btn btn-ghost btn-sm" disabled={busy} onClick={() => remove(p)}>Delete</button>
@@ -150,19 +150,19 @@ export function SettingsPage() {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900 }}>System Settings</h1>
-      <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>Applied on the kiosk's next session start.</p>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>System Settings</h1>
+      <p style={{ color: "var(--text-3)", fontSize: 13.5, marginTop: 4 }}>Applied on the kiosk's next session start.</p>
 
       <div className="card" style={{ padding: 8, marginTop: 20 }}>
         {Object.entries(settings).map(([key, value]) => {
           const meta = SETTING_LABELS[key] ?? { label: key, help: "" };
           const isBool = typeof value === "boolean";
           return (
-            <div key={key} style={{ display: "flex", gap: 16, alignItems: "center", padding: 16, borderBottom: "1px solid var(--bg-2)", flexWrap: "wrap" }}>
+            <div key={key} style={{ display: "flex", gap: 16, alignItems: "center", padding: 16, borderBottom: "1px solid var(--surface-2)", flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: 260 }}>
                 <div style={{ fontWeight: 700, fontSize: 14.5 }}>{meta.label}</div>
-                <div style={{ color: "var(--ink-3)", fontSize: 12.5, marginTop: 2 }}>{meta.help}</div>
-                <div style={{ color: "var(--ink-3)", fontSize: 11, fontFamily: "monospace", marginTop: 4 }}>{key}</div>
+                <div style={{ color: "var(--text-3)", fontSize: 12.5, marginTop: 2 }}>{meta.help}</div>
+                <div style={{ color: "var(--text-3)", fontSize: 11, fontFamily: "monospace", marginTop: 4 }}>{key}</div>
               </div>
               {isBool ? (
                 <select value={drafts[key]} onChange={(e) => setDrafts({ ...drafts, [key]: e.target.value })} style={{ width: 120 }}>
@@ -210,8 +210,8 @@ export function AuditPage() {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900 }}>Audit Log</h1>
-      <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>Audit Log</h1>
+      <p style={{ color: "var(--text-3)", fontSize: 13.5, marginTop: 4 }}>
         Every administrative change is recorded — product edits, safety-limit changes, refills, fault simulation, and settings.
       </p>
 
@@ -219,15 +219,15 @@ export function AuditPage() {
         <table className="table">
           <thead><tr><th>When</th><th>User</th><th>Role</th><th>Action</th><th>Entity</th><th>Detail</th></tr></thead>
           <tbody>
-            {items.length === 0 && <tr><td colSpan={6} style={{ padding: 24, color: "var(--ink-3)" }}>No administrative changes recorded yet.</td></tr>}
+            {items.length === 0 && <tr><td colSpan={6} style={{ padding: 24, color: "var(--text-3)" }}>No administrative changes recorded yet.</td></tr>}
             {items.map((a) => (
               <tr key={a.id}>
-                <td style={{ whiteSpace: "nowrap", color: "var(--ink-2)", fontSize: 12.5 }}>{new Date(a.createdAt).toLocaleString()}</td>
+                <td style={{ whiteSpace: "nowrap", color: "var(--text-2)", fontSize: 12.5 }}>{new Date(a.createdAt).toLocaleString()}</td>
                 <td style={{ fontWeight: 700 }}>{a.user?.name ?? "—"}</td>
-                <td style={{ color: "var(--ink-2)", fontSize: 12.5 }}>{a.user?.role.replace("_", " ").toLowerCase() ?? "—"}</td>
+                <td style={{ color: "var(--text-2)", fontSize: 12.5 }}>{a.user?.role.replace("_", " ").toLowerCase() ?? "—"}</td>
                 <td style={{ fontFamily: "monospace", fontSize: 12 }}>{a.action}</td>
-                <td style={{ color: "var(--ink-2)", fontSize: 12.5 }}>{a.entity}</td>
-                <td style={{ fontFamily: "monospace", fontSize: 11.5, color: "var(--ink-3)", maxWidth: 380, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <td style={{ color: "var(--text-2)", fontSize: 12.5 }}>{a.entity}</td>
+                <td style={{ fontFamily: "monospace", fontSize: 11.5, color: "var(--text-3)", maxWidth: 380, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {a.detail ? JSON.stringify(a.detail) : "—"}
                 </td>
               </tr>

@@ -51,7 +51,7 @@ async function buyFlow(productName) {
   await page.mouse.click(960, 540);
   await page.waitForTimeout(700);
   await page.locator(".product-grid > .card").filter({ hasText: productName }).first()
-    .getByRole("button", { name: "+ Add to mix" }).click();
+    .getByRole("button", { name: "Add to mix", exact: true }).click();
   await page.waitForTimeout(1000);
   await page.getByRole("button", { name: "My Mix", exact: false }).click();
   await page.waitForTimeout(1100);
@@ -82,7 +82,7 @@ await page.getByRole("button", { name: "Non-Stim" }).click();
 await page.waitForTimeout(500);
 const nonStim = await page.locator(".product-grid > .card").count();
 nonStim === 2 ? ok("filters", `${nonStim} non-stim products`) : bad("filters", `expected 2, got ${nonStim}`);
-await page.getByRole("button", { name: "All Pre-Workouts" }).click();
+await page.getByRole("button", { name: "All", exact: true }).click();
 await page.waitForTimeout(400);
 
 await page.locator(".product-grid > .card").filter({ hasText: "Static" }).first().click();
@@ -157,6 +157,41 @@ await page.getByText("What causes the tingle?").click();
 await page.waitForTimeout(500);
 await page.getByText("paresthesia", { exact: false }).waitFor({ timeout: 6000 });
 ok("education area");
+
+console.log("\nTHEMES");
+
+// The kiosk is dark by default; the toggle must flip it and survive a reload.
+await page.goto(KIOSK, { waitUntil: "networkidle" });
+await page.waitForTimeout(700);
+const themeOf = () => page.evaluate(() => ({
+  attr: document.documentElement.getAttribute("data-theme"),
+  bg: getComputedStyle(document.body).backgroundColor,
+}));
+
+const darkState = await themeOf();
+darkState.attr === "dark" ? ok("kiosk defaults to dark") : bad("kiosk defaults to dark", `got ${darkState.attr}`);
+
+await page.getByRole("button", { name: "Light" }).click();
+await page.waitForTimeout(600);
+const lightState = await themeOf();
+lightState.attr === "light" && lightState.bg !== darkState.bg
+  ? ok("theme toggle switches to light", lightState.bg)
+  : bad("theme toggle switches to light", `${lightState.attr} / ${lightState.bg}`);
+
+await page.reload({ waitUntil: "networkidle" });
+await page.waitForTimeout(700);
+const afterReload = await themeOf();
+afterReload.attr === "light"
+  ? ok("theme choice persists across reload")
+  : bad("theme choice persists across reload", `got ${afterReload.attr}`);
+
+// Light mode must stay legible — check body text contrast is not washed out.
+const textColor = await page.evaluate(() => getComputedStyle(document.body).color);
+textColor !== lightState.bg ? ok("light mode text is not the background colour", textColor) : bad("light mode text is not the background colour");
+
+await page.getByRole("button", { name: "Dark" }).click();
+await page.waitForTimeout(500);
+(await themeOf()).attr === "dark" ? ok("theme toggle switches back to dark") : bad("theme toggle switches back to dark");
 
 console.log("\nSIMULATED HARDWARE FAULTS");
 

@@ -21,8 +21,8 @@ function CartScreen() {
     return (
       <div className="card" style={{ padding: 48, textAlign: "center", maxWidth: 560, margin: "40px auto" }}>
         <div style={{ fontSize: 44 }} aria-hidden>🥤</div>
-        <h3 style={{ fontSize: 22, fontWeight: 800, margin: "12px 0" }}>Your mix is empty</h3>
-        <p style={{ color: "var(--ink-2)", marginBottom: 20 }}>Add a pre-workout — or mix two — and we'll track the totals for you.</p>
+        <h3 style={{ fontSize: 22, fontWeight: 700, margin: "12px 0" }}>Your mix is empty</h3>
+        <p style={{ color: "var(--text-2)", marginBottom: 20 }}>Add a pre-workout — or mix two — and we'll track the totals for you.</p>
         <button className="btn btn-primary" onClick={() => go("browse")}>Browse products</button>
       </div>
     );
@@ -36,7 +36,7 @@ function CartScreen() {
   return (
     <div className="fade-in" style={{ maxWidth: 1140, margin: "0 auto", display: "grid", gridTemplateColumns: "minmax(420px, 1.5fr) minmax(320px, 1fr)", gap: 24, alignItems: "start" }}>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <h2 style={{ fontSize: 26, fontWeight: 900 }}>Your mix</h2>
+        <h2 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>Your mix</h2>
         {cart.map((item) => {
           const p = products.find((x) => x.id === item.productId);
           if (!p) return null;
@@ -44,9 +44,9 @@ function CartScreen() {
             <div key={item.productId} className="card" style={{ padding: 18, display: "flex", gap: 16, alignItems: "center", position: "relative" }}>
               <ProductArt imageKey={p.imageKey} accentColor={p.accentColor} size={64} radius={14} />
               <div style={{ flex: 1, minWidth: 120, paddingRight: 34 }}>
-                <div style={{ fontWeight: 800, fontSize: 17 }}>{p.name}</div>
-                <div style={{ fontSize: 13, color: "var(--ink-2)" }}>{p.brand} · {p.flavor}</div>
-                <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 2 }}>
+                <div style={{ fontWeight: 700, fontSize: 17 }}>{p.name}</div>
+                <div style={{ fontSize: 13, color: "var(--text-2)" }}>{p.brand} · {p.flavor}</div>
+                <div style={{ fontSize: 13, color: "var(--text-3)", marginTop: 2 }}>
                   {p.caffeineMgPerScoop > 0 ? `${p.caffeineMgPerScoop * item.scoops} mg caffeine` : "Caffeine-free"} · {(p.servingSizeGrams * item.scoops).toFixed(0)} g
                 </div>
               </div>
@@ -54,7 +54,7 @@ function CartScreen() {
                 {Array.from({ length: p.maxScoopsPerServing }, (_, i) => i + 1).map((n) => (
                   <button
                     key={n}
-                    className={`filter-chip ${item.scoops === n ? "active" : ""}`}
+                    className={`chip ${item.scoops === n ? "active" : ""}`}
                     style={{ minWidth: 92 }}
                     onClick={() => setScoops(item.productId, n)}
                   >
@@ -81,11 +81,11 @@ function CartScreen() {
         <div className="card" style={{ padding: 20 }}>
           {quote && (
             <>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, color: "var(--ink-2)", marginBottom: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, color: "var(--text-2)", marginBottom: 6 }}>
                 <span>Total serving</span><span>{quote.totalGrams} g</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 24, fontWeight: 900 }}>
-                <span>Total</span><span style={{ color: "var(--brand-2)" }}>{formatCents(quote.totalCents)}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 24, fontWeight: 750 }}>
+                <span>Total</span><span style={{ letterSpacing: "-0.03em" }}>{formatCents(quote.totalCents)}</span>
               </div>
             </>
           )}
@@ -124,42 +124,48 @@ function SafetyPanel() {
 
   return (
     <div className="card" style={{ padding: 20 }}>
-      <div style={{ fontWeight: 800, marginBottom: 12, fontSize: 15, letterSpacing: "0.04em" }}>SAFETY TRACKER</div>
-      {quote.limits.length === 0 && <div style={{ color: "var(--ink-3)", fontSize: 14 }}>No limited ingredients in this mix.</div>}
+      <div style={{ fontWeight: 700, marginBottom: 12, fontSize: 15, letterSpacing: "0.04em" }}>SAFETY TRACKER</div>
+      {quote.limits.length === 0 && <div style={{ color: "var(--text-3)", fontSize: 14 }}>No limited ingredients in this mix.</div>}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {quote.limits.map((l) => (
           <div key={l.ingredientId}>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13.5, marginBottom: 4 }}>
               <span style={{ fontWeight: 700 }}>{l.ingredientName}</span>
-              <span style={{ color: l.exceeded ? "var(--bad)" : "var(--ink-2)", fontWeight: l.exceeded ? 800 : 500 }}>
+              <span style={{ color: l.exceeded ? "var(--danger-fg)" : "var(--text-2)", fontWeight: l.exceeded ? 800 : 500 }}>
                 {l.amount} / {l.max} {l.unit}
               </span>
             </div>
-            <Meter percent={(l.amount / l.max) * 100} color={l.exceeded ? "var(--bad)" : l.amount / l.max > 0.8 ? "var(--warn)" : "var(--good)"} />
+            <Meter percent={(l.amount / l.max) * 100} color={l.exceeded ? "var(--danger-fg)" : l.amount / l.max > 0.8 ? "var(--warn-fg)" : "var(--good-fg)"} />
           </div>
         ))}
       </div>
 
       {quote.violations.length > 0 && (
-        <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-          {quote.violations.map((v, i) => (
-            <div key={i} style={{ background: "rgba(208,59,59,0.12)", border: "1px solid rgba(208,59,59,0.4)", borderRadius: 12, padding: 14 }}>
-              <div style={{ fontWeight: 700, fontSize: 14, display: "flex", gap: 8 }}>
-                <span aria-hidden>⛔</span>{v.message}
+        <div
+          className="fade-in"
+          style={{ marginTop: 16, background: "var(--danger-soft)", border: "1px solid var(--danger-border)", borderRadius: "var(--r)", padding: 15 }}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+            {quote.violations.map((v, i) => (
+              <div key={i} style={{ fontWeight: 600, fontSize: 13.5, display: "flex", gap: 8, lineHeight: 1.45 }}>
+                <span aria-hidden style={{ flexShrink: 0 }}>⛔</span>{v.message}
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
-                {v.suggestions.map((s, j) => (
-                  <button key={j} className="btn btn-ghost btn-sm" onClick={() => applySuggestion(s)}>{s}</button>
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* One deduplicated set of fixes — two limits often share the same
+              remedy, and repeating the button reads as a bug. */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 13 }}>
+            {[...new Set(quote.violations.flatMap((v) => v.suggestions))].map((s) => (
+              <button key={s} className="btn btn-ghost btn-sm" onClick={() => applySuggestion(s)}>{s}</button>
+            ))}
+          </div>
         </div>
       )}
 
       {quote.totals.length > 0 && (
         <details style={{ marginTop: 14 }}>
-          <summary style={{ color: "var(--ink-3)", fontSize: 13, cursor: "pointer" }}>All ingredient totals</summary>
+          <summary style={{ color: "var(--text-3)", fontSize: 13, cursor: "pointer" }}>All ingredient totals</summary>
           <table className="table" style={{ marginTop: 8, fontSize: 13 }}>
             <tbody>
               {quote.totals.map((t) => (
@@ -195,12 +201,12 @@ function WarningsScreen() {
 
   return (
     <div className="fade-in" style={{ maxWidth: 720, margin: "0 auto" }}>
-      <h2 style={{ fontSize: 28, fontWeight: 900, marginBottom: 6 }}>Before you continue</h2>
-      <p style={{ color: "var(--ink-2)", marginBottom: 20 }}>Please review the information for your selection. This is product information, not medical advice.</p>
+      <h2 style={{ fontSize: 28, fontWeight: 750, marginBottom: 6 }}>Before you continue</h2>
+      <p style={{ color: "var(--text-2)", marginBottom: 20 }}>Please review the information for your selection. This is product information, not medical advice.</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {quote.warnings.length === 0 && (
-          <div className="card" style={{ padding: 24, color: "var(--ink-2)" }}>No specific warnings apply to this selection.</div>
+          <div className="card" style={{ padding: 24, color: "var(--text-2)" }}>No specific warnings apply to this selection.</div>
         )}
         {quote.warnings.map((w) => {
           const requires = w.requiresAcknowledgement || w.severity === "IMPORTANT";
@@ -209,14 +215,14 @@ function WarningsScreen() {
               key={w.id}
               className="card"
               onClick={requires ? () => toggle(w.id) : undefined}
-              style={{ padding: 18, display: "flex", gap: 14, alignItems: "flex-start", cursor: requires ? "pointer" : "default", borderColor: requires && !acknowledged.has(w.id) ? "var(--warn)" : undefined }}
+              style={{ padding: 18, display: "flex", gap: 14, alignItems: "flex-start", cursor: requires ? "pointer" : "default", borderColor: requires && !acknowledged.has(w.id) ? "var(--warn-fg)" : undefined }}
             >
               {requires && (
                 <div style={{
                   width: 30, height: 30, borderRadius: 8, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
-                  border: `2px solid ${acknowledged.has(w.id) ? "var(--good)" : "var(--ink-3)"}`,
-                  background: acknowledged.has(w.id) ? "rgba(12,163,12,0.18)" : "transparent",
-                  color: "var(--good)", fontWeight: 900,
+                  border: `2px solid ${acknowledged.has(w.id) ? "var(--good-fg)" : "var(--text-3)"}`,
+                  background: acknowledged.has(w.id) ? "var(--good-soft)" : "transparent",
+                  color: "var(--good-fg)", fontWeight: 750,
                 }}>
                   {acknowledged.has(w.id) ? "✓" : ""}
                 </div>
@@ -224,10 +230,10 @@ function WarningsScreen() {
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 4, flexWrap: "wrap" }}>
                   <SeverityPill severity={w.severity} />
-                  <span style={{ fontWeight: 800 }}>{w.title}</span>
+                  <span style={{ fontWeight: 700 }}>{w.title}</span>
                 </div>
-                <div style={{ color: "var(--ink-2)", fontSize: 14.5, lineHeight: 1.5 }}>{w.body}</div>
-                {requires && <div style={{ fontSize: 12.5, color: "var(--ink-3)", marginTop: 6 }}>Tap to confirm you have read this.</div>}
+                <div style={{ color: "var(--text-2)", fontSize: 14.5, lineHeight: 1.5 }}>{w.body}</div>
+                {requires && <div style={{ fontSize: 12.5, color: "var(--text-3)", marginTop: 6 }}>Tap to confirm you have read this.</div>}
               </div>
             </div>
           );
@@ -274,33 +280,33 @@ function SummaryScreen() {
 
   return (
     <div className="fade-in" style={{ maxWidth: 640, margin: "0 auto" }}>
-      <h2 style={{ fontSize: 28, fontWeight: 900, marginBottom: 18 }}>Order summary</h2>
+      <h2 style={{ fontSize: 28, fontWeight: 750, marginBottom: 18 }}>Order summary</h2>
       <div className="card" style={{ padding: 24 }}>
         {quote.items.map((i) => (
-          <div key={i.productId} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--bg-2)" }}>
+          <div key={i.productId} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--surface-2)" }}>
             <div>
-              <div style={{ fontWeight: 700 }}>{i.name} <span style={{ color: "var(--ink-3)" }}>· {i.flavor}</span></div>
-              <div style={{ fontSize: 13, color: "var(--ink-2)" }}>{i.scoops} scoop{i.scoops > 1 ? "s" : ""} · {i.gramsTarget} g</div>
+              <div style={{ fontWeight: 700 }}>{i.name} <span style={{ color: "var(--text-3)" }}>· {i.flavor}</span></div>
+              <div style={{ fontSize: 13, color: "var(--text-2)" }}>{i.scoops} scoop{i.scoops > 1 ? "s" : ""} · {i.gramsTarget} g</div>
             </div>
-            <div style={{ fontWeight: 800 }}>{formatCents(i.lineTotalCents)}</div>
+            <div style={{ fontWeight: 700 }}>{formatCents(i.lineTotalCents)}</div>
           </div>
         ))}
 
         <div style={{ display: "flex", gap: 18, margin: "16px 0", flexWrap: "wrap" }}>
-          <div className="pill" style={{ background: "var(--bg-2)", color: "var(--ink-2)", fontSize: 13, textTransform: "none", letterSpacing: 0 }}>
+          <div className="pill" style={{ background: "var(--surface-2)", color: "var(--text-2)", fontSize: 13, textTransform: "none", letterSpacing: 0 }}>
             ☕ Total caffeine: <b>&nbsp;{caffeine ? `${caffeine.amount} mg` : "0 mg"}</b>
           </div>
-          <div className="pill" style={{ background: "var(--bg-2)", color: "var(--ink-2)", fontSize: 13, textTransform: "none", letterSpacing: 0 }}>
+          <div className="pill" style={{ background: "var(--surface-2)", color: "var(--text-2)", fontSize: 13, textTransform: "none", letterSpacing: 0 }}>
             ⚖️ {quote.totalGrams} g total
           </div>
-          <div className="pill" style={{ background: "var(--bg-2)", color: "var(--ink-2)", fontSize: 13, textTransform: "none", letterSpacing: 0 }}>
+          <div className="pill" style={{ background: "var(--surface-2)", color: "var(--text-2)", fontSize: 13, textTransform: "none", letterSpacing: 0 }}>
             ✓ {quote.warnings.length} warning{quote.warnings.length === 1 ? "" : "s"} reviewed
           </div>
         </div>
 
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 28, fontWeight: 900, marginTop: 8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 28, fontWeight: 750, marginTop: 8 }}>
           <span>Total</span>
-          <span style={{ color: "var(--brand-2)" }}>{formatCents(quote.totalCents)}</span>
+          <span style={{ letterSpacing: "-0.03em" }}>{formatCents(quote.totalCents)}</span>
         </div>
       </div>
 
@@ -309,7 +315,7 @@ function SummaryScreen() {
       <button className="btn btn-primary btn-xl" style={{ width: "100%", marginTop: 20 }} disabled={paying} onClick={pay}>
         {paying ? "Processing payment…" : `💳 PAY NOW — ${formatCents(quote.totalCents)}`}
       </button>
-      <div style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 13, marginTop: 10 }}>
+      <div style={{ textAlign: "center", color: "var(--text-3)", fontSize: 13, marginTop: 10 }}>
         Simulated payment — card, Apple Pay, Google Pay and gym membership arrive with the payment-terminal integration.
       </div>
     </div>
@@ -343,12 +349,12 @@ function DispensingScreen() {
 
   return (
     <div className="fade-in" style={{ maxWidth: 560, margin: "40px auto", textAlign: "center" }}>
-      <h2 style={{ fontSize: 30, fontWeight: 900 }}>Preparing your pre-workout</h2>
+      <h2 style={{ fontSize: 30, fontWeight: 750 }}>Preparing your pre-workout</h2>
       <div style={{ margin: "28px 0", fontSize: 64, animation: "pulse 1.4s ease infinite" }} aria-hidden>🥤</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {(order?.dispensing ?? []).map((d, i) => (
           <div key={i} className="card" style={{ padding: 18, textAlign: "left" }}>
-            <div style={{ fontWeight: 800, marginBottom: 10 }}>{d.productName}</div>
+            <div style={{ fontWeight: 700, marginBottom: 10 }}>{d.productName}</div>
             <div style={{ display: "flex", gap: 8 }}>
               {steps.map((label, si) => {
                 const at = activeStep(d.status);
@@ -357,9 +363,9 @@ function DispensingScreen() {
                 return (
                   <div key={label} style={{ flex: 1 }}>
                     <div className="meter" style={{ height: 6, marginBottom: 6 }}>
-                      <div style={{ width: done ? "100%" : current ? "55%" : "0%", background: done ? "var(--good)" : "var(--brand)" }} />
+                      <div style={{ width: done ? "100%" : current ? "55%" : "0%", background: done ? "var(--good-fg)" : "var(--accent)" }} />
                     </div>
-                    <div style={{ fontSize: 12.5, color: done || current ? "var(--ink-1)" : "var(--ink-3)", fontWeight: current ? 800 : 500 }}>
+                    <div style={{ fontSize: 12.5, color: done || current ? "var(--text)" : "var(--text-3)", fontWeight: current ? 800 : 500 }}>
                       Step {si + 1}: {label}{done ? " ✓" : ""}
                     </div>
                   </div>
@@ -367,7 +373,7 @@ function DispensingScreen() {
               })}
             </div>
             {d.status === "FAULTED" && (
-              <div style={{ color: "var(--bad)", fontWeight: 700, marginTop: 10 }}>⚠️ {d.error ?? "Dispenser fault"}</div>
+              <div style={{ color: "var(--danger-fg)", fontWeight: 700, marginTop: 10 }}>⚠️ {d.error ?? "Dispenser fault"}</div>
             )}
           </div>
         ))}
@@ -399,22 +405,22 @@ function CompleteScreen() {
   return (
     <div className="fade-in" style={{ maxWidth: 560, margin: "48px auto", textAlign: "center" }}>
       <div style={{ fontSize: 84 }} aria-hidden>{failed ? "😕" : "💪"}</div>
-      <h2 style={{ fontSize: 34, fontWeight: 900, margin: "16px 0 8px" }}>
+      <h2 style={{ fontSize: 34, fontWeight: 750, margin: "16px 0 8px" }}>
         {failed ? "Something went wrong" : "Your pre-workout is ready!"}
       </h2>
-      <p style={{ color: "var(--ink-2)", fontSize: 17, lineHeight: 1.5 }}>
+      <p style={{ color: "var(--text-2)", fontSize: 17, lineHeight: 1.5 }}>
         {failed
           ? order?.failureReason ?? "The machine could not finish your order. You have not been charged."
           : "Grab your cup, add water, shake well — and have a great workout. Thank you!"}
       </p>
       {order && !failed && (
-        <div className="pill" style={{ marginTop: 16, background: "var(--bg-2)", color: "var(--ink-2)", textTransform: "none", letterSpacing: 0, fontSize: 13 }}>
+        <div className="pill" style={{ marginTop: 16, background: "var(--surface-2)", color: "var(--text-2)", textTransform: "none", letterSpacing: 0, fontSize: 13 }}>
           Receipt ref: {order.paymentRef ?? order.id.slice(-8).toUpperCase()}
         </div>
       )}
       <div style={{ marginTop: 32 }}>
         <button className="btn btn-primary" onClick={() => resetToAttract()}>Done</button>
-        <div style={{ color: "var(--ink-3)", fontSize: 13, marginTop: 12 }}>Returning to start in {Math.max(0, left)} s…</div>
+        <div style={{ color: "var(--text-3)", fontSize: 13, marginTop: 12 }}>Returning to start in {Math.max(0, left)} s…</div>
       </div>
     </div>
   );

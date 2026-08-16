@@ -72,34 +72,34 @@ export function InventoryPage() {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900 }}>Inventory</h1>
-      <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>Inventory</h1>
+      <p style={{ color: "var(--text-3)", fontSize: 13.5, marginTop: 4 }}>
         Weight-tracked bins. {lowCount > 0 ? `⚠️ ${lowCount} bin${lowCount === 1 ? "" : "s"} below threshold.` : "All bins above threshold."}
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 16, marginTop: 20 }}>
         {bins.map((b) => (
-          <div key={b.id} className="card" style={{ padding: 20, opacity: b.disabled ? 0.55 : 1, borderColor: b.low ? "var(--warn)" : undefined }}>
+          <div key={b.id} className="card" style={{ padding: 20, opacity: b.disabled ? 0.55 : 1, borderColor: b.low ? "var(--warn-fg)" : undefined }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
               <div>
-                <div style={{ fontSize: 11.5, color: "var(--ink-3)", fontWeight: 700, letterSpacing: "0.08em" }}>
+                <div style={{ fontSize: 11.5, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em" }}>
                   {b.machine} · BIN {b.binNumber}
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 800 }}>{b.product?.name ?? "Empty bin"}</div>
-                {b.product && <div style={{ fontSize: 13, color: "var(--ink-2)" }}>{b.product.brand} · {b.product.flavor}</div>}
+                <div style={{ fontSize: 18, fontWeight: 700 }}>{b.product?.name ?? "Empty bin"}</div>
+                {b.product && <div style={{ fontSize: 13, color: "var(--text-2)" }}>{b.product.brand} · {b.product.flavor}</div>}
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 24, fontWeight: 900, fontVariantNumeric: "tabular-nums" }}>{b.percent}%</div>
-                {b.low && <span className="pill" style={{ background: "rgba(250,178,25,0.18)", color: "var(--warn)" }}>⚠️ Low</span>}
-                {b.disabled && <span className="pill" style={{ background: "var(--bg-3)", color: "var(--ink-3)" }}>Disabled</span>}
+                <div style={{ fontSize: 24, fontWeight: 750, fontVariantNumeric: "tabular-nums" }}>{b.percent}%</div>
+                {b.low && <span className="pill" style={{ background: "var(--warn-soft)", color: "var(--warn-fg)" }}>⚠️ Low</span>}
+                {b.disabled && <span className="pill" style={{ background: "var(--surface-3)", color: "var(--text-3)" }}>Disabled</span>}
               </div>
             </div>
 
             <div style={{ margin: "14px 0 10px" }}>
-              <Meter percent={b.percent} color={b.percent < 20 ? "var(--bad)" : b.percent < 40 ? "var(--warn)" : "var(--good)"} />
+              <Meter percent={b.percent} color={b.percent < 20 ? "var(--danger-fg)" : b.percent < 40 ? "var(--warn-fg)" : "var(--good-fg)"} />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px", fontSize: 12.5, color: "var(--ink-2)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px", fontSize: 12.5, color: "var(--text-2)" }}>
               <Row label="Current" value={`${Math.round(b.currentGrams).toLocaleString()} g`} />
               <Row label="Capacity" value={`${b.capacityGrams.toLocaleString()} g`} />
               <Row label="Est. servings" value={b.estimatedServings !== null ? String(b.estimatedServings) : "—"} />
@@ -126,8 +126,8 @@ export function InventoryPage() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <>
-      <span style={{ color: "var(--ink-3)" }}>{label}</span>
-      <span style={{ textAlign: "right", fontWeight: 600, color: "var(--ink-1)" }}>{value}</span>
+      <span style={{ color: "var(--text-3)" }}>{label}</span>
+      <span style={{ textAlign: "right", fontWeight: 600, color: "var(--text)" }}>{value}</span>
     </>
   );
 }

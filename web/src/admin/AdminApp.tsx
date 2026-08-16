@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { adminRequest, setAdminToken, ApiError } from "../api/client";
+import { ThemeToggle } from "../design/theme";
 import { OverviewPage } from "./Overview";
 import { SalesAnalyticsPage, ProductAnalyticsPage, InteractionAnalyticsPage } from "./Analytics";
 import { InventoryPage } from "./Inventory";
@@ -49,11 +50,11 @@ function LoginScreen({ onLogin }: { onLogin: (me: Me) => void }) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-0)" }}>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
       <form className="card" style={{ padding: 40, width: 360, textAlign: "center" }} onSubmit={submit}>
         <div style={{ fontSize: 36 }} aria-hidden>🔐</div>
-        <h1 style={{ fontSize: 22, fontWeight: 900, margin: "10px 0 4px" }}>Admin access</h1>
-        <p style={{ color: "var(--ink-3)", fontSize: 13, marginBottom: 20 }}>Enter your operator PIN</p>
+        <h1 style={{ fontSize: 22, fontWeight: 750, margin: "10px 0 4px" }}>Admin access</h1>
+        <p style={{ color: "var(--text-3)", fontSize: 13, marginBottom: 20 }}>Enter your operator PIN</p>
         <input
           type="password"
           inputMode="numeric"
@@ -63,11 +64,11 @@ function LoginScreen({ onLogin }: { onLogin: (me: Me) => void }) {
           style={{ width: "100%", textAlign: "center", fontSize: 24, letterSpacing: "0.4em", padding: 14 }}
           placeholder="••••"
         />
-        {error && <div style={{ color: "var(--bad)", fontSize: 13.5, marginTop: 10 }}>{error}</div>}
+        {error && <div style={{ color: "var(--danger-fg)", fontSize: 13.5, marginTop: 10 }}>{error}</div>}
         <button className="btn btn-primary" style={{ width: "100%", marginTop: 18 }} disabled={busy || pin.length < 4}>
           {busy ? "Checking…" : "Sign in"}
         </button>
-        <div style={{ color: "var(--ink-3)", fontSize: 12, marginTop: 16 }}>Demo PINs: 1234 (super admin) · 3456 (gym manager) · 4567 (technician)</div>
+        <div style={{ color: "var(--text-3)", fontSize: 12, marginTop: 16 }}>Demo PINs: 1234 (super admin) · 3456 (gym manager) · 4567 (technician)</div>
       </form>
     </div>
   );
@@ -117,7 +118,7 @@ function AdminShell({ me, onLogout }: { me: Me; onLogout: () => void }) {
   return (
     <div className="admin">
       <nav className="admin-nav">
-        <div style={{ padding: "6px 14px 18px", fontWeight: 900, letterSpacing: "0.06em", fontSize: 15 }}>
+        <div style={{ padding: "6px 14px 18px", fontWeight: 750, letterSpacing: "0.06em", fontSize: 15 }}>
           ⚡ <span>PULSEFUEL</span>
         </div>
         {NAV.map((n) => (
@@ -125,10 +126,15 @@ function AdminShell({ me, onLogout }: { me: Me; onLogout: () => void }) {
             {n.icon} <span>{n.label}</span>
           </NavLink>
         ))}
-        <div style={{ marginTop: "auto", padding: "14px 14px 4px", borderTop: "1px solid var(--line)" }}>
-          <div style={{ fontSize: 13, fontWeight: 700 }}>{me.name}</div>
-          <div style={{ fontSize: 11.5, color: "var(--ink-3)", marginBottom: 8 }}>{me.role.replace("_", " ")}</div>
-          <button className="btn btn-ghost btn-sm" style={{ width: "100%" }} onClick={onLogout}>Sign out</button>
+        <div style={{ marginTop: "auto", padding: "14px 12px 4px", borderTop: "1px solid var(--border)" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <ThemeToggle />
+          </div>
+          <div className="nav-footer-text" style={{ fontSize: 13, fontWeight: 650 }}>{me.name}</div>
+          <div className="nav-footer-text" style={{ fontSize: 11.5, color: "var(--text-3)", marginBottom: 8, textTransform: "capitalize" }}>
+            {me.role.replace(/_/g, " ").toLowerCase()}
+          </div>
+          <button className="btn btn-ghost btn-sm" style={{ width: "100%" }} onClick={onLogout} title="Sign out">⎋ <span className="nav-footer-text">Sign out</span></button>
         </div>
       </nav>
 
@@ -154,7 +160,7 @@ function AdminShell({ me, onLogout }: { me: Me; onLogout: () => void }) {
       {/* Toast alerts */}
       <div style={{ position: "fixed", right: 20, bottom: 20, display: "flex", flexDirection: "column", gap: 10, zIndex: 100 }}>
         {alerts.map((a) => (
-          <div key={a.id} className="card fade-in" style={{ padding: "12px 18px", borderColor: a.severity === "error" ? "var(--bad)" : a.severity === "warning" ? "var(--warn)" : "var(--line)", maxWidth: 380, fontSize: 13.5 }}>
+          <div key={a.id} className="card fade-in" style={{ padding: "12px 18px", borderColor: a.severity === "error" ? "var(--danger-fg)" : a.severity === "warning" ? "var(--warn-fg)" : "var(--border)", maxWidth: 380, fontSize: 13.5 }}>
             {a.severity === "error" ? "🔴" : a.severity === "warning" ? "🟡" : "🔵"} {a.message}
           </div>
         ))}

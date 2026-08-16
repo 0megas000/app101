@@ -40,10 +40,10 @@ export function SalesAnalyticsPage() {
   return (
     <div className="fade-in">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 900 }}>Sales Analytics</h1>
+        <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>Sales Analytics</h1>
         <div style={{ display: "flex", gap: 8 }}>
           {[7, 30, 90].map((d) => (
-            <button key={d} className={`filter-chip ${days === d ? "active" : ""}`} style={{ minHeight: 38, fontSize: 13 }} onClick={() => setDays(d)}>
+            <button key={d} className={`chip ${days === d ? "active" : ""}`} style={{ minHeight: 38, fontSize: 13 }} onClick={() => setDays(d)}>
               Last {d} days
             </button>
           ))}
@@ -72,7 +72,7 @@ export function SalesAnalyticsPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20, marginTop: 20 }}>
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 16 }}>Transactions by hour of day</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Transactions by hour of day</h3>
           <BarChart
             height={140}
             data={data.hourly.map((h) => ({
@@ -83,7 +83,7 @@ export function SalesAnalyticsPage() {
           />
         </div>
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 16 }}>Revenue by day of week</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Revenue by day of week</h3>
           <HBarList
             data={data.weekday.map((w) => ({ label: WEEKDAYS[w.weekday]!, value: w.revenueCents, sub: `${w.count} tx` }))}
             format={formatCents}
@@ -114,7 +114,7 @@ export function ProductAnalyticsPage() {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900, marginBottom: 18 }}>Product Analytics <span style={{ fontSize: 14, color: "var(--ink-3)", fontWeight: 500 }}>· last 30 days</span></h1>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 18 }}>Product Analytics <span style={{ fontSize: 14, color: "var(--text-3)", fontWeight: 500 }}>· last 30 days</span></h1>
 
       <div className="stat-grid">
         <StatTile label="Best Seller" value={best?.name ?? "—"} sub={best ? `${best.purchases} purchases · ${formatCents(best.revenueCents)}` : undefined} />
@@ -142,8 +142,8 @@ export function ProductAnalyticsPage() {
             {data.products.map((p) => (
               <tr key={p.name + p.flavor}>
                 <td style={{ fontWeight: 700 }}>{p.name}</td>
-                <td style={{ color: "var(--ink-2)" }}>{p.brand}</td>
-                <td style={{ color: "var(--ink-2)" }}>{p.flavor}</td>
+                <td style={{ color: "var(--text-2)" }}>{p.brand}</td>
+                <td style={{ color: "var(--text-2)" }}>{p.flavor}</td>
                 <td style={{ fontVariantNumeric: "tabular-nums" }}>{p.purchases}</td>
                 <td style={{ fontVariantNumeric: "tabular-nums" }}>{p.oneScoop}</td>
                 <td style={{ fontVariantNumeric: "tabular-nums" }}>{p.twoScoop}</td>
@@ -176,8 +176,8 @@ export function InteractionAnalyticsPage() {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900 }}>User Interaction Analytics</h1>
-      <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>User Interaction Analytics</h1>
+      <p style={{ color: "var(--text-3)", fontSize: 13.5, marginTop: 4 }}>
         Anonymous session data only — no personally identifiable information is collected.
       </p>
 
@@ -190,15 +190,15 @@ export function InteractionAnalyticsPage() {
             const stepPct = prev ? Math.round((f.count / Math.max(1, prev)) * 100) : null;
             return (
               <div key={f.stage}>
-                {i > 0 && <div style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 12, padding: "2px 0" }}>↓ {stepPct}%</div>}
+                {i > 0 && <div style={{ textAlign: "center", color: "var(--text-3)", fontSize: 12, padding: "2px 0" }}>↓ {stepPct}%</div>}
                 <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                  <div style={{ width: 160, fontSize: 13.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--ink-2)" }}>{f.stage}</div>
-                  <div style={{ flex: 1, background: "var(--bg-3)", borderRadius: 6, height: 34, overflow: "hidden" }}>
-                    <div style={{ width: `${pct}%`, height: "100%", background: "var(--series-1)", borderRadius: "6px", display: "flex", alignItems: "center", paddingLeft: 12, fontSize: 13, fontWeight: 800, color: "#fff", minWidth: 60 }}>
+                  <div style={{ width: 160, fontSize: 13.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--text-2)" }}>{f.stage}</div>
+                  <div style={{ flex: 1, background: "var(--surface-3)", borderRadius: 6, height: 34, overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: "var(--series-1)", borderRadius: "6px", display: "flex", alignItems: "center", paddingLeft: 12, fontSize: 13, fontWeight: 700, color: "#fff", minWidth: 60 }}>
                       {f.count}
                     </div>
                   </div>
-                  <div style={{ width: 52, textAlign: "right", color: "var(--ink-3)", fontSize: 13, fontVariantNumeric: "tabular-nums" }}>{pct}%</div>
+                  <div style={{ width: 52, textAlign: "right", color: "var(--text-3)", fontSize: 13, fontVariantNumeric: "tabular-nums" }}>{pct}%</div>
                 </div>
               </div>
             );
@@ -217,15 +217,15 @@ export function InteractionAnalyticsPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginTop: 20 }}>
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 16 }}>Most viewed products</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Most viewed products</h3>
           <HBarList data={toBars(data.topViewedProducts)} />
         </div>
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 16 }}>Most researched ingredients</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Most researched ingredients</h3>
           <HBarList data={toBars(data.topIngredients)} />
         </div>
         <div className="card" style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 16 }}>Common filter paths</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Common filter paths</h3>
           <HBarList data={toBars(data.topFilterPaths)} />
         </div>
       </div>

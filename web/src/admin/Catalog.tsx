@@ -43,8 +43,8 @@ export function ProductsPage() {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900 }}>Product Management</h1>
-      <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>Product Management</h1>
+      <p style={{ color: "var(--text-3)", fontSize: 13.5, marginTop: 4 }}>
         Adding or changing a product never requires a code change — the kiosk reads everything from here.
       </p>
 
@@ -57,13 +57,13 @@ export function ProductsPage() {
             {products.map((p) => (
               <tr key={p.id}>
                 <td style={{ fontWeight: 700 }}>{p.name}</td>
-                <td style={{ color: "var(--ink-2)" }}>{p.brand.name}</td>
-                <td style={{ color: "var(--ink-2)" }}>{p.flavor}</td>
+                <td style={{ color: "var(--text-2)" }}>{p.brand.name}</td>
+                <td style={{ color: "var(--text-2)" }}>{p.flavor}</td>
                 <td style={{ fontVariantNumeric: "tabular-nums" }}>{formatCents(p.pricePerScoopCents)}</td>
                 <td style={{ fontVariantNumeric: "tabular-nums" }}>{p.caffeineMgPerScoop} mg</td>
                 <td>{p.strength.toLowerCase()}</td>
-                <td style={{ fontSize: 12, color: "var(--ink-3)", maxWidth: 220 }}>{p.tags.map((t) => t.tag.label).join(", ")}</td>
-                <td>{p.active ? <span style={{ color: "var(--good)" }}>● Active</span> : <span style={{ color: "var(--ink-3)" }}>○ Hidden</span>}</td>
+                <td style={{ fontSize: 12, color: "var(--text-3)", maxWidth: 220 }}>{p.tags.map((t) => t.tag.label).join(", ")}</td>
+                <td>{p.active ? <span style={{ color: "var(--good-fg)" }}>● Active</span> : <span style={{ color: "var(--text-3)" }}>○ Hidden</span>}</td>
                 <td><button className="btn btn-ghost btn-sm" onClick={() => setEditing(p)}>Edit</button></td>
               </tr>
             ))}
@@ -112,8 +112,8 @@ function ProductEditor({ product, onClose, onSaved }: { product: AdminProduct; o
 
   return (
     <Modal onClose={onClose} wide>
-      <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 4 }}>Edit product</h3>
-      <div style={{ color: "var(--ink-3)", fontSize: 13, marginBottom: 20 }}>{product.brand.name} · changes are written to the audit log</div>
+      <h3 style={{ fontSize: 22, fontWeight: 750, marginBottom: 4 }}>Edit product</h3>
+      <div style={{ color: "var(--text-3)", fontSize: 13, marginBottom: 20 }}>{product.brand.name} · changes are written to the audit log</div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <Field label="Name"><input value={form.name} onChange={str("name")} style={{ width: "100%" }} /></Field>
@@ -144,11 +144,11 @@ function ProductEditor({ product, onClose, onSaved }: { product: AdminProduct; o
         <Check label="Staff pick" checked={form.staffPick} onChange={bool("staffPick")} />
       </div>
 
-      <div style={{ marginTop: 18, padding: 14, background: "var(--bg-2)", borderRadius: 12, fontSize: 13, color: "var(--ink-2)" }}>
+      <div style={{ marginTop: 18, padding: 14, background: "var(--surface-2)", borderRadius: 12, fontSize: 13, color: "var(--text-2)" }}>
         <b>Ingredients</b> (per scoop): {product.ingredients.map((i) => `${i.ingredient.name} ${i.amountPerScoop} ${i.ingredient.unit}`).join(" · ")}
       </div>
 
-      {err && <div style={{ color: "var(--bad)", marginTop: 12 }}>{err}</div>}
+      {err && <div style={{ color: "var(--danger-fg)", marginTop: 12 }}>{err}</div>}
       <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
         <button className="btn btn-primary" style={{ flex: 1 }} disabled={busy} onClick={save}>{busy ? "Saving…" : "Save changes"}</button>
         <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
@@ -160,7 +160,7 @@ function ProductEditor({ product, onClose, onSaved }: { product: AdminProduct; o
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label style={{ display: "block", marginTop: 10 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--ink-3)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
+      <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-3)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
       {children}
     </label>
   );
@@ -208,8 +208,8 @@ export function IngredientsPage() {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900 }}>Ingredient Database</h1>
-      <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>Ingredient Database</h1>
+      <p style={{ color: "var(--text-3)", fontSize: 13.5, marginTop: 4 }}>
         Powers the [?] education tooltips on the kiosk. Plain language first; keep claims conservative and non-medical.
       </p>
 
@@ -222,10 +222,10 @@ export function IngredientsPage() {
             {items.map((i) => (
               <tr key={i.id}>
                 <td style={{ fontWeight: 700 }}>{i.name}</td>
-                <td style={{ color: "var(--ink-2)", fontSize: 12.5 }}>{i.category.replace("_", " ").toLowerCase()}</td>
+                <td style={{ color: "var(--text-2)", fontSize: 12.5 }}>{i.category.replace("_", " ").toLowerCase()}</td>
                 <td style={{ whiteSpace: "nowrap" }}>{i.typicalDoseMin}–{i.typicalDoseMax} {i.unit}</td>
-                <td>{i.tracked ? <span style={{ color: "var(--warn)" }}>🛡 Tracked</span> : <span style={{ color: "var(--ink-3)" }}>—</span>}</td>
-                <td style={{ color: "var(--ink-2)", fontSize: 12.5, maxWidth: 380 }}>{i.plainExplanation.slice(0, 110)}…</td>
+                <td>{i.tracked ? <span style={{ color: "var(--warn-fg)" }}>🛡 Tracked</span> : <span style={{ color: "var(--text-3)" }}>—</span>}</td>
+                <td style={{ color: "var(--text-2)", fontSize: 12.5, maxWidth: 380 }}>{i.plainExplanation.slice(0, 110)}…</td>
                 <td><button className="btn btn-ghost btn-sm" onClick={() => setEditing(i)}>Edit</button></td>
               </tr>
             ))}
@@ -263,8 +263,8 @@ function IngredientEditor({ ingredient, onClose, onSaved }: { ingredient: AdminI
 
   return (
     <Modal onClose={onClose} wide>
-      <h3 style={{ fontSize: 22, fontWeight: 900 }}>{ingredient.name}</h3>
-      <div style={{ color: "var(--ink-3)", fontSize: 13, marginBottom: 12 }}>{ingredient.category.replace("_", " ").toLowerCase()} · {ingredient.unit}</div>
+      <h3 style={{ fontSize: 22, fontWeight: 750 }}>{ingredient.name}</h3>
+      <div style={{ color: "var(--text-3)", fontSize: 13, marginBottom: 12 }}>{ingredient.category.replace("_", " ").toLowerCase()} · {ingredient.unit}</div>
       <Field label="What does it do? (plain language)">
         <textarea value={form.plainExplanation} onChange={(e) => setForm({ ...form, plainExplanation: e.target.value })} rows={3} style={{ width: "100%" }} />
       </Field>
@@ -325,8 +325,8 @@ export function WarningsPage() {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900 }}>Warning Management</h1>
-      <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>Warning Management</h1>
+      <p style={{ color: "var(--text-3)", fontSize: 13.5, marginTop: 4 }}>
         Warnings merge automatically when products are mixed. IMPORTANT and acknowledgement-flagged warnings must be confirmed before payment; BLOCKING warnings stop the sale.
       </p>
 
@@ -339,11 +339,11 @@ export function WarningsPage() {
             {items.map((w) => (
               <tr key={w.id}>
                 <td><SeverityPill severity={w.severity} /></td>
-                <td style={{ fontFamily: "monospace", fontSize: 12, color: "var(--ink-2)" }}>{w.code}</td>
+                <td style={{ fontFamily: "monospace", fontSize: 12, color: "var(--text-2)" }}>{w.code}</td>
                 <td style={{ fontWeight: 700 }}>{w.title}</td>
                 <td>{w.requiresAcknowledgement ? "✓ Yes" : "—"}</td>
-                <td style={{ color: "var(--ink-3)", fontSize: 12.5 }}>{w.products.length}</td>
-                <td>{w.active ? <span style={{ color: "var(--good)" }}>● Active</span> : <span style={{ color: "var(--ink-3)" }}>○ Off</span>}</td>
+                <td style={{ color: "var(--text-3)", fontSize: 12.5 }}>{w.products.length}</td>
+                <td>{w.active ? <span style={{ color: "var(--good-fg)" }}>● Active</span> : <span style={{ color: "var(--text-3)" }}>○ Off</span>}</td>
                 <td><button className="btn btn-ghost btn-sm" onClick={() => setEditing(w)}>Edit</button></td>
               </tr>
             ))}
@@ -376,7 +376,7 @@ function WarningEditor({ warning, onClose, onSaved }: { warning: AdminWarning; o
 
   return (
     <Modal onClose={onClose}>
-      <h3 style={{ fontSize: 22, fontWeight: 900, marginBottom: 12 }}>Edit warning</h3>
+      <h3 style={{ fontSize: 22, fontWeight: 750, marginBottom: 12 }}>Edit warning</h3>
       <Field label="Title"><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} style={{ width: "100%" }} /></Field>
       <Field label="Body"><textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} rows={4} style={{ width: "100%" }} /></Field>
       <Field label="Severity">
@@ -450,8 +450,8 @@ export function LimitsPage() {
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900 }}>Safety Rules & Ingredient Limits</h1>
-      <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4, maxWidth: 760 }}>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em" }}>Safety Rules & Ingredient Limits</h1>
+      <p style={{ color: "var(--text-3)", fontSize: 13.5, marginTop: 4, maxWidth: 760 }}>
         These values are enforced server-side on every quote and every checkout. Nothing here is hard-coded — set them to match
         your manufacturer guidance and local regulatory requirements. Operators are responsible for the values chosen.
       </p>
@@ -474,11 +474,11 @@ export function LimitsPage() {
                       onChange={(e) => setDrafts({ ...drafts, [l.id]: Number(e.target.value) })}
                       style={{ width: 110 }}
                     />
-                    <span style={{ color: "var(--ink-3)" }}>{l.ingredient.unit}</span>
+                    <span style={{ color: "var(--text-3)" }}>{l.ingredient.unit}</span>
                   </div>
                 </td>
-                <td style={{ color: "var(--ink-2)", fontSize: 12.5, maxWidth: 320 }}>{l.note ?? "—"}</td>
-                <td>{l.active ? <span style={{ color: "var(--good)" }}>● Enforced</span> : <span style={{ color: "var(--bad)" }}>○ Disabled</span>}</td>
+                <td style={{ color: "var(--text-2)", fontSize: 12.5, maxWidth: 320 }}>{l.note ?? "—"}</td>
+                <td>{l.active ? <span style={{ color: "var(--good-fg)" }}>● Enforced</span> : <span style={{ color: "var(--danger-fg)" }}>○ Disabled</span>}</td>
                 <td style={{ whiteSpace: "nowrap" }}>
                   <button className="btn btn-primary btn-sm" disabled={busy === l.id || drafts[l.id] === l.maxPerTransaction} onClick={() => saveLimit(l.id)}>Save</button>{" "}
                   <button className="btn btn-ghost btn-sm" disabled={busy === l.id} onClick={() => toggleLimit(l.id, !l.active)}>{l.active ? "Disable" : "Enable"}</button>
@@ -499,9 +499,9 @@ export function LimitsPage() {
             {data.rules.map((r) => (
               <tr key={r.id}>
                 <td style={{ fontWeight: 700 }}>{r.name}</td>
-                <td style={{ fontFamily: "monospace", fontSize: 12, color: "var(--ink-2)" }}>{r.type}</td>
-                <td style={{ fontFamily: "monospace", fontSize: 12, color: "var(--ink-2)", maxWidth: 380, overflow: "hidden", textOverflow: "ellipsis" }}>{JSON.stringify(r.config)}</td>
-                <td>{r.active ? <span style={{ color: "var(--good)" }}>● Enforced</span> : <span style={{ color: "var(--bad)" }}>○ Disabled</span>}</td>
+                <td style={{ fontFamily: "monospace", fontSize: 12, color: "var(--text-2)" }}>{r.type}</td>
+                <td style={{ fontFamily: "monospace", fontSize: 12, color: "var(--text-2)", maxWidth: 380, overflow: "hidden", textOverflow: "ellipsis" }}>{JSON.stringify(r.config)}</td>
+                <td>{r.active ? <span style={{ color: "var(--good-fg)" }}>● Enforced</span> : <span style={{ color: "var(--danger-fg)" }}>○ Disabled</span>}</td>
                 <td><button className="btn btn-ghost btn-sm" disabled={busy === r.id} onClick={() => toggleRule(r.id, !r.active)}>{r.active ? "Disable" : "Enable"}</button></td>
               </tr>
             ))}

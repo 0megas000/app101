@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { kioskApi, type Bootstrap, type ProductCard, type Quote } from "../api/client";
 import { ProductArt, Spinner, ErrorBox } from "../design/components";
+import { ThemeToggle } from "../design/theme";
 import { BrowseScreen } from "./Browse";
 import { DetailScreen } from "./Detail";
 import { CompareScreen } from "./Compare";
@@ -195,7 +196,9 @@ function KioskShell({ bootstrap, initialProducts }: { bootstrap: Bootstrap; init
 
 function AttractScreen({ onStart }: { onStart: () => void }) {
   const { bootstrap, products } = useKiosk();
-  const slides = bootstrap.promotions.length > 0 ? bootstrap.promotions : [{ id: "x", kind: "MESSAGE", title: "Fuel your workout", subtitle: null, productId: null, accentColor: "#7c5cff" }];
+  const slides = bootstrap.promotions.length > 0
+    ? bootstrap.promotions
+    : [{ id: "x", kind: "MESSAGE", title: "Fuel your workout", subtitle: null, productId: null, accentColor: "var(--accent)" }];
   const [index, setIndex] = useState(0);
   const rotate = Number(bootstrap.settings["kiosk.attractRotationSeconds"] ?? 7);
 
@@ -211,30 +214,63 @@ function AttractScreen({ onStart }: { onStart: () => void }) {
     <div
       className="kiosk"
       onPointerDown={onStart}
-      style={{ justifyContent: "space-between", cursor: "pointer", textAlign: "center" }}
+      style={{ justifyContent: "space-between", cursor: "pointer", textAlign: "center", position: "relative" }}
     >
-      <div style={{ paddingTop: 64 }}>
-        <div style={{ fontSize: 15, letterSpacing: "0.35em", color: "var(--ink-3)", fontWeight: 700 }}>PRE-WORKOUT BAR</div>
+      <div style={{ paddingTop: 56, display: "flex", justifyContent: "center", alignItems: "center", gap: 12 }}>
+        <div style={{ fontSize: 13, letterSpacing: "0.42em", color: "var(--text-3)", fontWeight: 700 }}>PRE-WORKOUT BAR</div>
       </div>
 
-      <div key={slide.id + String(index)} className="fade-in" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, padding: "0 48px" }}>
+      {/* Theme control sits in a corner, out of the customer's path */}
+      <div style={{ position: "absolute", top: 22, right: 26 }} onPointerDown={(e) => e.stopPropagation()}>
+        <ThemeToggle compact />
+      </div>
+
+      <div
+        key={slide.id + String(index)}
+        className="rise-in"
+        style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 26, padding: "0 48px" }}
+      >
         {featured
-          ? <ProductArt imageKey={featured.imageKey} accentColor={featured.accentColor} size={180} radius={36} />
-          : <div style={{ fontSize: 96 }} aria-hidden>⚡</div>}
-        <h1 style={{ fontSize: "clamp(40px, 7vw, 84px)", fontWeight: 900, lineHeight: 1.05, background: `linear-gradient(120deg, ${slide.accentColor}, #ffffff)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          ? <ProductArt imageKey={featured.imageKey} accentColor={featured.accentColor} size={172} />
+          : <div style={{ fontSize: 84 }} aria-hidden>⚡</div>}
+        <h1
+          style={{
+            fontSize: "clamp(42px, 7.5vw, 88px)",
+            fontWeight: 700,
+            lineHeight: 1.02,
+            letterSpacing: "-0.045em",
+            maxWidth: 15 + "ch",
+            background: `linear-gradient(135deg, ${slide.accentColor}, var(--text) 88%)`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
           {slide.title}
         </h1>
-        {slide.subtitle ? <p style={{ fontSize: 22, color: "var(--ink-2)", maxWidth: 640 }}>{slide.subtitle}</p> : null}
-        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+        {slide.subtitle
+          ? <p style={{ fontSize: 21, color: "var(--text-2)", maxWidth: 620, lineHeight: 1.45 }}>{slide.subtitle}</p>
+          : null}
+        <div style={{ display: "flex", gap: 7, marginTop: 6 }}>
           {slides.map((_, i) => (
-            <div key={i} style={{ width: i === index ? 24 : 8, height: 8, borderRadius: 4, background: i === index ? "var(--brand)" : "var(--bg-3)", transition: "all 0.3s ease" }} />
+            <div
+              key={i}
+              style={{
+                width: i === index ? 26 : 7, height: 7, borderRadius: 4,
+                background: i === index ? "var(--accent)" : "var(--surface-3)",
+                transition: "all var(--slow) var(--ease-out)",
+              }}
+            />
           ))}
         </div>
       </div>
 
-      <div style={{ paddingBottom: 72 }}>
-        <div className="btn btn-primary btn-xl" style={{ animation: "pulse 2.2s ease infinite" }}>
-          👆&nbsp; TAP TO START
+      <div style={{ paddingBottom: 64 }}>
+        <div className="btn btn-primary btn-xl" style={{ animation: "breathe 2.6s var(--ease-out) infinite" }}>
+          Tap to start
+        </div>
+        <div style={{ color: "var(--text-3)", fontSize: 13, marginTop: 16 }}>
+          Touch anywhere on the screen
         </div>
       </div>
     </div>
@@ -243,6 +279,13 @@ function AttractScreen({ onStart }: { onStart: () => void }) {
 
 // ── Chrome ───────────────────────────────────────────────────────────
 
+/** Progress rail so the customer always knows where they are in checkout. */
+const CHECKOUT_STEPS: { key: KioskScreen; label: string }[] = [
+  { key: "cart", label: "Your mix" },
+  { key: "warnings", label: "Review" },
+  { key: "summary", label: "Pay" },
+];
+
 function KioskHeader() {
   const { screen, go, resetToAttract, cart } = useKiosk();
   const backTarget: Partial<Record<KioskScreen, KioskScreen>> = {
@@ -250,30 +293,81 @@ function KioskHeader() {
     warnings: "cart", summary: "warnings",
   };
   const back = backTarget[screen];
+  const stepIndex = CHECKOUT_STEPS.findIndex((s) => s.key === screen);
+
   return (
     <div className="kiosk-header">
-      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-        {back && screen !== "browse"
-          ? <button className="btn btn-ghost" onClick={() => go(back)}>← Back</button>
-          : <div style={{ width: 4 }} />}
+      <div style={{ flex: 1, display: "flex", justifyContent: "flex-start" }}>
+        {back ? <button className="btn btn-ghost btn-sm" onClick={() => go(back)}>← Back</button> : <span />}
       </div>
-      <div style={{ fontWeight: 900, letterSpacing: "0.24em", fontSize: 15, color: "var(--ink-2)" }}>PRE-WORKOUT BAR</div>
-      <button className="btn btn-ghost" onClick={() => resetToAttract(cart.length > 0 ? "session_timeout" : undefined)}>✕ Start over</button>
+
+      {stepIndex >= 0 ? (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {CHECKOUT_STEPS.map((s, i) => (
+            <React.Fragment key={s.key}>
+              {i > 0 && (
+                <div style={{ width: 26, height: 2, borderRadius: 2, background: i <= stepIndex ? "var(--accent)" : "var(--surface-3)", transition: "background-color var(--normal) var(--ease-out)" }} />
+              )}
+              <div style={{
+                display: "flex", alignItems: "center", gap: 7,
+                color: i === stepIndex ? "var(--text)" : i < stepIndex ? "var(--text-2)" : "var(--text-3)",
+                fontSize: 13, fontWeight: i === stepIndex ? 650 : 500,
+              }}>
+                <span style={{
+                  display: "grid", placeItems: "center",
+                  width: 20, height: 20, borderRadius: "50%", fontSize: 11, fontWeight: 700,
+                  background: i <= stepIndex ? "var(--accent)" : "var(--surface-3)",
+                  color: i <= stepIndex ? "var(--accent-ink)" : "var(--text-3)",
+                  transition: "all var(--normal) var(--ease-out)",
+                }}>
+                  {i < stepIndex ? "✓" : i + 1}
+                </span>
+                {s.label}
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+      ) : (
+        <div style={{ fontWeight: 700, letterSpacing: "0.3em", fontSize: 12.5, color: "var(--text-3)" }}>PRE-WORKOUT BAR</div>
+      )}
+
+      <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: 10, alignItems: "center" }}>
+        <ThemeToggle compact />
+        <button className="btn btn-ghost btn-sm" onClick={() => resetToAttract(cart.length > 0 ? "session_timeout" : undefined)}>
+          Start over
+        </button>
+      </div>
     </div>
   );
 }
 
 function KioskFooterBar() {
   const { go, cart, quote, screen } = useKiosk();
+  const nav: { key: KioskScreen; icon: string; label: string }[] = [
+    { key: "browse", icon: "🛍", label: "Browse" },
+    { key: "quiz", icon: "🎯", label: "Find My Pre" },
+    { key: "learn", icon: "📖", label: "Learn" },
+  ];
   return (
     <div className="kiosk-footer">
-      <div style={{ display: "flex", gap: 10 }}>
-        <button className={`filter-chip ${screen === "browse" ? "active" : ""}`} onClick={() => go("browse")}>🛍 Browse</button>
-        <button className={`filter-chip ${screen === "quiz" ? "active" : ""}`} onClick={() => go("quiz")}>🎯 Find My Pre</button>
-        <button className={`filter-chip ${screen === "learn" ? "active" : ""}`} onClick={() => go("learn")}>📖 Learn</button>
+      <div style={{ display: "flex", gap: 8 }}>
+        {nav.map((n) => (
+          <button key={n.key} className={`chip ${screen === n.key ? "active" : ""}`} onClick={() => go(n.key)}>
+            {n.icon} {n.label}
+          </button>
+        ))}
       </div>
       <button className="btn btn-primary" disabled={cart.length === 0} onClick={() => go("cart")}>
-        🥤 My Mix{cart.length > 0 ? ` (${cart.length})` : ""}{quote ? ` · $${(quote.totalCents / 100).toFixed(2)}` : ""}
+        My mix
+        {cart.length > 0 ? (
+          <span style={{
+            display: "grid", placeItems: "center", minWidth: 22, height: 22, padding: "0 6px",
+            borderRadius: "var(--r-full)", background: "rgba(255,255,255,0.22)", fontSize: 12.5, fontWeight: 700,
+          }}>
+            {cart.length}
+          </span>
+        ) : null}
+        {quote ? <span style={{ opacity: 0.85 }}>${(quote.totalCents / 100).toFixed(2)}</span> : null}
       </button>
     </div>
   );

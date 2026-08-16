@@ -151,6 +151,18 @@ web/  React + TypeScript (Vite)          server/  Node + TypeScript (Express)
                                                     PostgreSQL
 ```
 
+### Theming
+
+Both surfaces ship light and dark themes. Every colour resolves through a semantic
+token in [`web/src/design/tokens.css`](web/src/design/tokens.css) — components never
+hardcode a hex value, which is what keeps light mode from breaking when a screen is added.
+
+The kiosk defaults to dark (it reads as premium on a large screen in a dim gym); the admin
+dashboard follows the operator's OS setting. Either can be overridden with the toggle —
+kiosk top-right, admin sidebar — and the choice persists in `localStorage`. A blocking
+script in `index.html` applies the stored theme before first paint, so a reload never
+flashes the wrong palette. `prefers-reduced-motion` disables all animation.
+
 Five rules the codebase holds to:
 
 1. **Safety math is server-side.** The kiosk renders what `POST /api/kiosk/quote` returns;

@@ -84,26 +84,26 @@ export function QuizScreen() {
   if (results) {
     return (
       <div className="fade-in" style={{ maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
-        <h2 style={{ fontSize: 30, fontWeight: 900, marginBottom: 4 }}>Recommended for you</h2>
-        <p style={{ color: "var(--ink-2)", marginBottom: 24 }}>Based on your answers — here's why each one fits.</p>
+        <h2 style={{ fontSize: 30, fontWeight: 750, marginBottom: 4 }}>Recommended for you</h2>
+        <p style={{ color: "var(--text-2)", marginBottom: 24 }}>Based on your answers — here's why each one fits.</p>
         {results.length === 0 && (
-          <div className="card" style={{ padding: 32, color: "var(--ink-2)" }}>
+          <div className="card" style={{ padding: 32, color: "var(--text-2)" }}>
             No strong match — try browsing all products instead.
           </div>
         )}
         <div style={{ display: "flex", flexDirection: "column", gap: 14, textAlign: "left" }}>
           {results.map((r, i) => (
-            <div key={r.productId} className="card" style={{ padding: 20, display: "flex", gap: 16, alignItems: "center", borderColor: i === 0 ? "var(--brand)" : undefined, flexWrap: "wrap" }}>
+            <div key={r.productId} className="card" style={{ padding: 20, display: "flex", gap: 16, alignItems: "center", borderColor: i === 0 ? "var(--accent)" : undefined, flexWrap: "wrap" }}>
               <ProductArt imageKey={r.imageKey} accentColor={r.accentColor} size={72} />
               <div style={{ flex: 1, minWidth: 180 }}>
                 <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                  <span style={{ fontWeight: 900, fontSize: 19 }}>{r.name}</span>
-                  {i === 0 && <span className="pill" style={{ background: "rgba(124,92,255,0.2)", color: "var(--brand-2)" }}>Top match</span>}
+                  <span style={{ fontWeight: 750, fontSize: 19 }}>{r.name}</span>
+                  {i === 0 && <span className="pill" style={{ background: "var(--accent-soft)", color: "var(--accent)" }}>Top match</span>}
                 </div>
-                <div style={{ fontSize: 13, color: "var(--ink-2)", marginBottom: 6 }}>{r.brand} · {r.flavor} · {r.caffeineMgPerScoop} mg caffeine</div>
+                <div style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 6 }}>{r.brand} · {r.flavor} · {r.caffeineMgPerScoop} mg caffeine</div>
                 <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 2 }}>
                   {r.reasons.map((reason, j) => (
-                    <li key={j} style={{ fontSize: 13.5, color: "var(--ink-2)" }}>✓ {reason}</li>
+                    <li key={j} style={{ fontSize: 13.5, color: "var(--text-2)" }}>✓ {reason}</li>
                   ))}
                 </ul>
               </div>
@@ -124,13 +124,13 @@ export function QuizScreen() {
   const q = QUESTIONS[step]!;
   return (
     <div className="fade-in" style={{ maxWidth: 640, margin: "24px auto", textAlign: "center" }}>
-      <div style={{ color: "var(--ink-3)", fontWeight: 700, letterSpacing: "0.1em", fontSize: 13 }}>
+      <div style={{ color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.1em", fontSize: 13 }}>
         FIND MY PRE · {step + 1} / {QUESTIONS.length}
       </div>
-      <h2 style={{ fontSize: 32, fontWeight: 900, margin: "14px 0 30px" }}>{q.title}</h2>
+      <h2 style={{ fontSize: 32, fontWeight: 750, margin: "14px 0 30px" }}>{q.title}</h2>
       <div style={{ display: "grid", gridTemplateColumns: q.options.length > 3 ? "1fr 1fr" : "1fr", gap: 14 }}>
         {q.options.map((o) => (
-          <button key={o.value} className="card" style={{ padding: 24, fontSize: 20, fontWeight: 800, display: "flex", gap: 14, alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={() => answer(o.value)}>
+          <button key={o.value} className="card" style={{ padding: 24, fontSize: 20, fontWeight: 700, display: "flex", gap: 14, alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={() => answer(o.value)}>
             <span style={{ fontSize: 30 }} aria-hidden>{o.emoji}</span> {o.label}
           </button>
         ))}

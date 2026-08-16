@@ -24,11 +24,11 @@ export function OverviewPage() {
   if (error) return <ErrorBox message="Could not load overview." onRetry={() => { setError(false); void load(); }} />;
   if (!data) return <Spinner />;
 
-  const statusStyle: Record<string, string> = { ONLINE: "var(--good)", OFFLINE: "var(--ink-3)", MAINTENANCE: "var(--warn)", ERROR: "var(--bad)" };
+  const statusStyle: Record<string, string> = { ONLINE: "var(--good-fg)", OFFLINE: "var(--text-3)", MAINTENANCE: "var(--warn-fg)", ERROR: "var(--danger-fg)" };
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontSize: 26, fontWeight: 900, marginBottom: 20 }}>Overview</h1>
+      <h1 style={{ fontSize: 26, fontWeight: 750, letterSpacing: "-0.03em", marginBottom: 20 }}>Overview</h1>
       <div className="stat-grid">
         <StatTile label="Today's Sales" value={formatCents(data.todaySalesCents)} sub={`${data.todayTransactions} transactions`} />
         <StatTile label="Weekly Sales" value={formatCents(data.weekSalesCents)} />
@@ -50,9 +50,9 @@ export function OverviewPage() {
               <tr key={m.id}>
                 <td style={{ fontWeight: 700 }}>{m.name}</td>
                 <td>{m.gym}</td>
-                <td style={{ color: "var(--ink-2)" }}>{m.serial}</td>
+                <td style={{ color: "var(--text-2)" }}>{m.serial}</td>
                 <td>
-                  <span style={{ color: statusStyle[m.status] ?? "var(--ink-2)", fontWeight: 700 }}>
+                  <span style={{ color: statusStyle[m.status] ?? "var(--text-2)", fontWeight: 700 }}>
                     {m.status === "ONLINE" ? "🟢" : m.status === "ERROR" ? "🔴" : m.status === "MAINTENANCE" ? "🟡" : "⚪"} {m.status}
                   </span>
                 </td>
