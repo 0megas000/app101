@@ -1,0 +1,446 @@
+// Smart Pre-Workout Dispenser Platform — relational schema
+// Multi-tenant fleet model: Organization → Gym → Location → Machine → Bin
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────── Identity ───────────────────────────────
+
+enum UserRole {
+  SUPER_ADMIN
+  BUSINESS_ADMIN
+  GYM_MANAGER
+  TECHNICIAN
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String
+  email          String?   @unique
+  role           UserRole
+  // Prototype auth: hashed PIN. Columns for future auth live here so the
+  // upgrade path is additive (password hash, MFA secret, last login).
+  pinHash        String?
+  passwordHash   String?
+  mfaSecret      String?
+  active         Boolean   @default(true)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  gymId          String?
+  gym            Gym?      @relation(fields: [gymId], references: [id])
+  auditLogs      AuditLog[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+// ─────────────────────────────── Fleet ───────────────────────────────
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  gyms      Gym[]
+  users     User[]
+  brands    Brand[]
+  products  Product[]
+  createdAt DateTime @default(now())
+}
+
+model Gym {
+  id             String       @id @default(cuid())
+  name           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  locations      Location[]
+  users          User[]
+  createdAt      DateTime     @default(now())
+}
+
+model Location {
+  id        String    @id @default(cuid())
+  name      String // e.g. "Main floor, next to free weights"
+  gymId     String
+  gym       Gym       @relation(fields: [gymId], references: [id])
+  machines  Machine[]
+  createdAt DateTime  @default(now())
+}
+
+enum MachineStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+  ERROR
+}
+
+model Machine {
+  id                String            @id @default(cuid())
+  serial            String            @unique // human identifier e.g. PWX-001
+  name              String
+  status            MachineStatus     @default(ONLINE)
+  locationId        String
+  location          Location          @relation(fields: [locationId], references: [id])
+  lastHeartbeatAt   DateTime?
+  lastMaintenanceAt DateTime?
+  bins              InventoryBin[]
+  transactions      SaleTransaction[]
+  errors            MachineError[]
+  maintenance       MaintenanceEvent[]
+  analyticsEvents   AnalyticsEvent[]
+  createdAt         DateTime          @default(now())
+}
+
+// ─────────────────────────────── Catalog ───────────────────────────────
+
+model Brand {
+  id             String       @id @default(cuid())
+  name           String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  products       Product[]
+}
+
+enum StrengthLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+// One row per brand + name + flavor variant (a bin holds exactly one powder).
+model Product {
+  id              String        @id @default(cuid())
+  organizationId  String
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+  brandId         String
+  brand           Brand         @relation(fields: [brandId], references: [id])
+  name            String
+  flavor          String
+  description     String
+  imageKey        String // key into the kiosk art set (gradient/icon), or URL later
+  accentColor     String @default("#7c5cff")
+  pricePerScoopCents Int
+  servingSizeGrams   Float
+  maxScoopsPerServing Int      @default(2)
+  caffeineMgPerScoop  Float    @default(0) // denormalized for fast filtering; source of truth is ProductIngredient
+  isStimulant     Boolean
+  energyRating    Int // 0-5
+  pumpRating      Int // 0-5
+  tingleRating    Int // 0-5
+  focusRating     Int @default(0) // 0-5
+  strength        StrengthLevel
+  featured        Boolean       @default(false)
+  staffPick       Boolean       @default(false)
+  active          Boolean       @default(true)
+  // Operator-verified dietary metadata (only shown when verified)
+  dietaryVerified Boolean       @default(false)
+  vegan           Boolean       @default(false)
+  sugarFree       Boolean       @default(false)
+  dyeFree         Boolean       @default(false)
+  supplementFacts Json // full facts panel: [{ label, amount, unit, dv? }]
+  ingredients     ProductIngredient[]
+  warnings        ProductWarning[]
+  tags            ProductTag[]
+  bins            InventoryBin[]
+  items           TransactionItem[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+enum IngredientCategory {
+  STIMULANT
+  PUMP
+  PERFORMANCE
+  FOCUS
+  ELECTROLYTE
+  AMINO_ACID
+  OTHER
+}
+
+model Ingredient {
+  id                 String             @id @default(cuid())
+  name               String             @unique
+  category           IngredientCategory
+  unit               String // "mg" | "g"
+  plainExplanation   String // "What does it do?" in plain language
+  sensation          String // "What might you feel?"
+  technicalExplanation String // "Learn more" content
+  typicalDoseMin     Float
+  typicalDoseMax     Float
+  warningInfo        String?
+  tracked            Boolean            @default(false) // participates in the limit engine display
+  products           ProductIngredient[]
+  limits             IngredientLimit[]
+}
+
+model ProductIngredient {
+  id            String     @id @default(cuid())
+  productId     String
+  product       Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  ingredientId  String
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id])
+  amountPerScoop Float // in the ingredient's unit
+  major         Boolean    @default(false) // shown as a highlighted ingredient card
+
+  @@unique([productId, ingredientId])
+}
+
+model Tag {
+  id       String       @id @default(cuid())
+  slug     String       @unique
+  label    String
+  products ProductTag[]
+}
+
+model ProductTag {
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([productId, tagId])
+}
+
+// ─────────────────────────────── Safety ───────────────────────────────
+
+enum WarningSeverity {
+  INFO
+  CAUTION
+  IMPORTANT
+  BLOCKING
+}
+
+model Warning {
+  id                      String           @id @default(cuid())
+  code                    String           @unique
+  severity                WarningSeverity
+  title                   String
+  body                    String
+  requiresAcknowledgement Boolean          @default(false)
+  active                  Boolean          @default(true)
+  products                ProductWarning[]
+}
+
+model ProductWarning {
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warningId String
+  warning   Warning @relation(fields: [warningId], references: [id], onDelete: Cascade)
+
+  @@id([productId, warningId])
+}
+
+// Per-transaction maximum for an ingredient. Fully data-driven.
+model IngredientLimit {
+  id                String     @id @default(cuid())
+  ingredientId      String
+  ingredient        Ingredient @relation(fields: [ingredientId], references: [id])
+  maxPerTransaction Float // in the ingredient's unit
+  active            Boolean    @default(true)
+  note              String?
+  updatedAt         DateTime   @updatedAt
+
+  @@unique([ingredientId])
+}
+
+// Typed, JSON-configured mix rules. v1 types:
+//   MAX_PRODUCTS_PER_MIX  config: { max: number }
+//   INCOMPATIBLE_TAGS     config: { tagSlugs: string[], message: string }
+model CombinationRule {
+  id      String  @id @default(cuid())
+  type    String
+  name    String
+  config  Json
+  active  Boolean @default(true)
+}
+
+// ─────────────────────────────── Inventory ───────────────────────────────
+
+model InventoryBin {
+  id                 String    @id @default(cuid())
+  machineId          String
+  machine            Machine   @relation(fields: [machineId], references: [id])
+  binNumber          Int
+  productId          String?
+  product            Product?  @relation(fields: [productId], references: [id])
+  capacityGrams      Float
+  currentGrams       Float
+  lowThresholdGrams  Float
+  lotNumber          String?
+  expiresAt          DateTime?
+  lastRefillAt       DateTime?
+  disabled           Boolean   @default(false) // e.g. recall or maintenance
+  inventoryTx        InventoryTransaction[]
+
+  @@unique([machineId, binNumber])
+}
+
+enum InventoryTxType {
+  REFILL
+  DISPENSE
+  ADJUSTMENT
+  WASTE
+}
+
+model InventoryTransaction {
+  id         String          @id @default(cuid())
+  binId      String
+  bin        InventoryBin    @relation(fields: [binId], references: [id])
+  type       InventoryTxType
+  deltaGrams Float // negative for dispense
+  note       String?
+  createdAt  DateTime        @default(now())
+}
+
+// ─────────────────────────────── Commerce ───────────────────────────────
+
+enum TransactionStatus {
+  PENDING_PAYMENT
+  PAID
+  DISPENSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model SaleTransaction {
+  id                    String            @id @default(cuid())
+  machineId             String
+  machine               Machine           @relation(fields: [machineId], references: [id])
+  kioskSessionId        String? // anonymous session, no PII
+  status                TransactionStatus @default(PENDING_PAYMENT)
+  totalCents            Int
+  totalCaffeineMg       Float             @default(0)
+  ingredientTotals      Json // [{ ingredientId, name, amount, unit }] frozen at purchase
+  acknowledgedWarningIds Json // warning ids the user acknowledged
+  paymentMethod         String? // "SIMULATED_CARD" now; card/applepay/membership later
+  paymentRef            String?
+  failureReason         String?
+  items                 TransactionItem[]
+  dispensingEvents      DispensingEvent[]
+  createdAt             DateTime          @default(now())
+  completedAt           DateTime?
+}
+
+model TransactionItem {
+  id            String          @id @default(cuid())
+  transactionId String
+  transaction   SaleTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product         @relation(fields: [productId], references: [id])
+  scoops        Int
+  unitPriceCents Int
+  gramsTarget   Float
+}
+
+enum DispenseStatus {
+  QUEUED
+  MEASURING
+  DISPENSING
+  READY
+  FAULTED
+}
+
+model DispensingEvent {
+  id            String          @id @default(cuid())
+  transactionId String
+  transaction   SaleTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  binId         String?
+  productName   String
+  status        DispenseStatus  @default(QUEUED)
+  gramsTarget   Float
+  gramsActual   Float? // real load-cell reading later; simulated now
+  error         String?
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime        @default(now())
+}
+
+// ─────────────────────────────── Operations ───────────────────────────────
+
+enum ErrorSeverity {
+  WARNING
+  ERROR
+  CRITICAL
+}
+
+model MachineError {
+  id         String        @id @default(cuid())
+  machineId  String
+  machine    Machine       @relation(fields: [machineId], references: [id])
+  code       String
+  severity   ErrorSeverity
+  message    String
+  component  String // "dispenser" | "scale" | "payment" | "sensor" | ...
+  resolvedAt DateTime?
+  createdAt  DateTime      @default(now())
+}
+
+model MaintenanceEvent {
+  id        String   @id @default(cuid())
+  machineId String
+  machine   Machine  @relation(fields: [machineId], references: [id])
+  kind      String // "CLEANING" | "REFILL" | "DISPENSER_TEST" | "CALIBRATION" | ...
+  note      String?
+  performedBy String?
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String // "product.update", "limit.update", ...
+  entity    String
+  entityId  String?
+  detail    Json?
+  createdAt DateTime @default(now())
+}
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────── Engagement ───────────────────────────────
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  machineId String?
+  machine   Machine? @relation(fields: [machineId], references: [id])
+  sessionId String? // anonymous kiosk session UUID — never linked to a person
+  type      String
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([sessionId])
+}
+
+// Idle-screen playlist entry / promotion.
+model Promotion {
+  id        String    @id @default(cuid())
+  kind      String // "PRODUCT_FEATURE" | "MESSAGE" | "PROMO"
+  title     String
+  subtitle  String?
+  productId String?
+  accentColor String  @default("#7c5cff")
+  sortOrder Int       @default(0)
+  active    Boolean   @default(true)
+  startsAt  DateTime?
+  endsAt    DateTime?
+}
+
+model EducationTopic {
+  id        String @id @default(cuid())
+  slug      String @unique
+  title     String
+  body      String
+  emoji     String @default("💡")
+  sortOrder Int    @default(0)
+  active    Boolean @default(true)
+}

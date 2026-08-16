@@ -1,0 +1,29 @@
+{
+  "name": "preworkout-dispenser-platform",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Smart Pre-Workout Dispenser Platform — kiosk, admin, API, simulated hardware",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "start": "npm run dev",
+    "dev": "concurrently --kill-others --names \"api,web\" --prefix-colors \"magenta,cyan\" \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "npm run dev --workspace server",
+    "dev:web": "npm run dev --workspace web",
+    "build": "npm run build --workspace server && npm run build --workspace web",
+    "db:migrate": "npm run db:migrate --workspace server",
+    "db:migrate:dev": "npm run db:migrate:dev --workspace server",
+    "db:seed": "npm run db:seed --workspace server",
+    "db:reset": "npm run db:migrate && npm run db:seed",
+    "typecheck": "npm run typecheck --workspace server && npm run typecheck --workspace web",
+    "test:e2e": "node e2e/smoke.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "pg": "^8.13.1",
+    "playwright": "^1.49.1"
+  }
+}
