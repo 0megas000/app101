@@ -15,27 +15,39 @@ today and real augers, load cells, and payment terminals later.
 Requires **Node 20+** and a running **PostgreSQL 14+**.
 
 ```bash
-# 1. Get the code
 git clone https://github.com/0megas000/app101.git
 cd app101
-
-# 2. Install (also generates the Prisma client)
 npm install
+npm run setup     # asks for your Postgres admin password, does the rest
+npm start
+```
 
-# 3. Create the database role and database
+`npm run setup` creates the database, writes `server/.env`, applies migrations, and loads
+demo data. It is safe to re-run, and it explains any problem in plain language rather than
+failing with a stack trace. For unattended installs, supply the answers up front:
+
+```bash
+PGHOST=localhost PGPORT=5432 PGUSER=postgres PGPASSWORD=… npm run setup
+```
+
+> **Never used a terminal before?** [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) walks
+> through it click by click, including installing Node and PostgreSQL on Windows.
+
+<details>
+<summary>Manual setup, if you'd rather not use the script</summary>
+
+```bash
+npm install                     # also generates the Prisma client
+
 psql -d postgres -c "CREATE USER preworkout WITH PASSWORD 'preworkout_dev';" \
                  -c "CREATE DATABASE preworkout OWNER preworkout;"
 
-# 4. Configure
 cp server/.env.example server/.env
-
-# 5. Create the tables and load demo data (10 products, 30 days of history)
-npm run db:migrate
-npm run db:seed
-
-# 6. Run both apps
+npm run db:migrate              # applies migrations
+npm run db:seed                 # 10 products, 30 days of history
 npm run dev
 ```
+</details>
 
 | Surface | URL |
 |---|---|
@@ -155,6 +167,7 @@ Five rules the codebase holds to:
 
 | Document | Contents |
 |---|---|
+| [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md) | Step-by-step setup for non-developers (Windows, macOS, Linux) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Stack rationale, system design, folder layout, roadmap, risks & open decisions |
 | [docs/DATABASE.md](docs/DATABASE.md) | Every entity, relationships, and the inventory ledger model |
 | [docs/API.md](docs/API.md) | Full kiosk + admin endpoint reference |
@@ -177,7 +190,8 @@ change the demo PINs, edit the seed or update `pinHash` (SHA-256 of `pwx-pin:<PI
 
 | Command | Effect |
 |---|---|
-| `npm run dev` | API (`:4000`) and web (`:5173`) together |
+| `npm run setup` | One-command first-time setup (database, config, demo data) |
+| `npm start` / `npm run dev` | API (`:4000`) and web (`:5173`) together |
 | `npm run dev:server` / `npm run dev:web` | One at a time |
 | `npm run build` | Typecheck the server, build the web bundle |
 | `npm run typecheck` | Strict TypeScript across both workspaces |

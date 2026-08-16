@@ -8,7 +8,9 @@
     "web"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace server & npm run dev --workspace web & wait",
+    "setup": "node scripts/setup.mjs",
+    "start": "npm run dev",
+    "dev": "concurrently --kill-others --names \"api,web\" --prefix-colors \"magenta,cyan\" \"npm:dev:server\" \"npm:dev:web\"",
     "dev:server": "npm run dev --workspace server",
     "dev:web": "npm run dev --workspace web",
     "build": "npm run build --workspace server && npm run build --workspace web",
@@ -20,6 +22,8 @@
     "test:e2e": "node e2e/smoke.mjs"
   },
   "devDependencies": {
+    "concurrently": "^9.1.0",
+    "pg": "^8.13.1",
     "playwright": "^1.49.1"
   }
 }
